@@ -77,8 +77,12 @@ def generate_whatsapp_message(order_id, name, phone, address, items, total):
     for item in items:
         lines.append(f"  • {item['name']} x{item['qty']} = ₹{item['price'] * item['qty']}")
     lines.append(f"━━━━━━━━━━━━━━━━━━")
-    lines.append(f"💰 *Total Amount: ₹{total}*")
-    lines.append(f"⚠️ Minimum order ₹300 | No COD/Return/Exchange")
+    shipping = 80
+    subtotal = total - shipping
+    lines.append(f"💰 *Subtotal: ₹{subtotal}*")
+    lines.append(f"🚚 *Shipping: ₹{shipping}*")
+    lines.append(f"💳 *Total Payable: ₹{total}*")
+    lines.append(f"⚠️ No COD | No Return/Exchange")
     return "\n".join(lines)
 
 # ── ROUTES ──
