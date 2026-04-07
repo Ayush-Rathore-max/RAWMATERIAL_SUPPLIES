@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DRAPE — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --cream: #f5f0e8; --dark: #1a1612; --muted: #6b6257; --accent: #c8a96e; --border: #e8e0d0; --card: #faf7f2; }
+    body { background: #f0ebe0; font-family: 'DM Sans', sans-serif; color: var(--dark); }
+    header { background: var(--dark); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-family: 'Cormorant Garamond', serif; color: var(--accent); font-size: 1.5rem; letter-spacing: 0.2em; }
+    header a { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; }
+    header a:hover { color: var(--cream); }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .card { background: var(--card); border: 1px solid var(--border); padding: 1.8rem; }
+    .card h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+    .form-group input, .form-group select { width: 100%; background: var(--cream); border: 1px solid var(--border); padding: 0.7rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--dark); outline: none; transition: border-color 0.3s; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .btn { background: var(--dark); color: var(--cream); border: none; padding: 0.8rem 1.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; width: 100%; margin-top: 0.5rem; transition: background 0.3s; }
+    .btn:hover { background: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .del-btn { background: none; border: 1px solid #ddd; color: #999; padding: 0.3rem 0.7rem; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .del-btn:hover { border-color: #c0392b; color: #c0392b; }
+    .full { grid-column: 1 / -1; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent); color: white; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat { background: var(--card); border: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; color: var(--accent); }
+    .stat-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
+    .order-items { font-size: 0.75rem; color: var(--muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>DRAPE Admin</h1>
+  <a href="/">← Back to Store</a>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">{{ products|length }}</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ orders|length }}</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">₹{{ "{:,}".format(orders | sum(attribute='total')) }}</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ADD PRODUCT -->
+    <div class="card">
+      <h2>Add New Product</h2>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="pName" placeholder="e.g. Linen Shirt"/>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="pCategory">
+          <option>Tops</option>
+          <option>Bottoms</option>
+          <option>Dresses</option>
+          <option>Outerwear</option>
+          <option>Accessories</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price (₹)</label>
+        <input type="number" id="pPrice" placeholder="1299"/>
+      </div>
+      <div class="form-group">
+        <label>Emoji Icon</label>
+        <input type="text" id="pEmoji" placeholder="👕" maxlength="2"/>
+      </div>
+      <button class="btn" onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- PRODUCTS LIST -->
+    <div class="card">
+      <h2>All Products</h2>
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr id="row-{{ p.id }}">
+            <td>{{ p.emoji }} {{ p.name }}</td>
+            <td><span class="badge">{{ p.category }}</span></td>
+            <td>₹{{ "{:,}".format(p.price) }}</td>
+            <td><button class="del-btn" onclick="deleteProduct({{ p.id }})">Delete</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="card full">
+      <h2>Recent Orders</h2>
+      {% if orders %}
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td><strong>#{{ o.id }}</strong></td>
+            <td>{{ o.name }}</td>
+            <td>{{ o.phone }}</td>
+            <td>{{ o.address[:40] }}{% if o.address|length > 40 %}...{% endif %}</td>
+            <td class="order-items">{{ o.items_json }}</td>
+            <td><strong>₹{{ "{:,}".format(o.total) }}</strong></td>
+            <td>{{ o.created_at[:10] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:var(--muted); font-style:italic; text-align:center; padding:2rem">Abhi koi order nahi aaya.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+  async function addProduct() {
+    const name     = document.getElementById('pName').value.trim();
+    const category = document.getElementById('pCategory').value;
+    const price    = document.getElementById('pPrice').value.trim();
+    const emoji    = document.getElementById('pEmoji').value.trim() || '👕';
+    if (!name || !price) { alert('Name aur price bharo!'); return; }
+    const fd = new FormData();
+    fd.append('name', name); fd.append('category', category);
+    fd.append('price', price); fd.append('emoji', emoji);
+    const res = await fetch('/admin/add-product', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) { location.reload(); }
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm('Delete karna hai?')) return;
+    const res = await fetch(`/admin/delete-product/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) { document.getElementById(`row-${id}`).remove(); }
+  }
+</script>
+</body>
+</html>
