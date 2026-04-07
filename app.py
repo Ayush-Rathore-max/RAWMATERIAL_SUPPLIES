@@ -102,7 +102,12 @@ def api_products():
     else:
         products = conn.execute('SELECT * FROM products').fetchall()
     conn.close()
-    return jsonify([dict(p) for p in products])
+    result = []
+    for p in products:
+        d = dict(p)
+        d["bg"] = d.get("color", "#f9c4d2")
+        result.append(d)
+    return jsonify(result)
 
 
 @app.route('/api/order', methods=['POST'])

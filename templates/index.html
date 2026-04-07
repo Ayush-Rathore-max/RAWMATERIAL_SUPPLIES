@@ -1112,12 +1112,14 @@
 
   function updateCartUI() {
     const count = cart.reduce((s,i) => s+i.qty, 0);
-    const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const shipping = subtotal >= 999 ? 0 : 99;
+    const total = subtotal + shipping;
     document.getElementById('cartCount').textContent = count;
     document.getElementById('cartSubtotal').textContent = `₹${subtotal}`;
-    document.getElementById('cartShipping').textContent = shipping===0? ' FREE🎉' : `₹${shipping}`;
+    document.getElementById('cartShipping').textContent = shipping===0? '🎉 FREE' : `₹${shipping}`;
     document.getElementById('cartTotal').textContent = `₹${total}`;
-    document.getElementById('modalTotal').textContent = `₹${total}`;
+    document.getElementById('modalTotal').textContent = `₹${total} ${shipping===0?'(Free Shipping 🎉)':''}`;
 
     const warn = document.getElementById('minOrderWarn');
     warn.classList.toggle('show', cart.length > 0 && total < 300);
@@ -1188,11 +1190,13 @@
     const phone   = document.getElementById('custPhone').value.trim();
     const address = document.getElementById('custAddress').value.trim();
     if (!name || !phone || !address) { showToast('Please fill all fields! 🙏'); return; }
-    const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const shipping = subtotal >= 999 ? 0 : 99;
+    const total = subtotal + shipping;
     const items = cart.map(i => ({id:i.id, name:i.name, qty:i.qty, price:i.price}));
 
     let orderId = Math.floor(Math.random()*9000)+1000;
-    let waUrl = buildWhatsAppURL(orderId, name, phone, address, items, total);
+    let waUrl = buildWhatsAppURL(orderId, name, phone, address, items, total, subtotal, shipping);
 
     try {
       const res = await fetch('/api/order', {
@@ -1214,11 +1218,11 @@
     cart = []; updateCartUI();
   }
 
-  function buildWhatsAppURL(orderId, name, phone, address, items, total) {
+  function buildWhatsAppURL(orderId, name, phone, address, items, total, subtotal=total, shipping=0) {
     let msg = `🛍️ *New Order!*\n━━━━━━━━━━━━━━\n`;
     msg += `📋 Order ID: #${orderId}\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Address: ${address}\n━━━━━━━━━━━━━━\n🛒 Items:\n`;
     items.forEach(i => { msg += `  • ${i.name} ×${i.qty} = ₹${i.price*i.qty}\n`; });
-    msg += `━━━━━━━━━━━━━━\n💰 Total: ₹${total}\n⚠️ Min ₹300 | No COD/Return`;
+    msg += `━━━━━━━━━━━━━━\n💰 Subtotal: ₹${subtotal}\n🚚 Shipping: ${shipping===0?'FREE 🎉':'₹'+shipping}\n💳 Total: ₹${total}\n⚠️ Min ₹300 | No COD/Return`;
     return `https://wa.me/917838133167?text=${encodeURIComponent(msg)}`;
   }
 
