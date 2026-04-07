@@ -963,7 +963,15 @@
     <div class="min-order-warn" id="minOrderWarn">
       ⚠️ Minimum order is ₹300! Please add more items.
     </div>
+   <div class="cart-total">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">₹0</span>
+    </div>
     <div class="cart-total">
+      <span>Shipping</span>
+      <span id="cartShipping">₹99</span>
+    </div>
+    <div class="cart-total" style="font-size:1rem;border-top:1px solid var(--border);padding-top:0.8rem;margin-top:0.5rem">
       <span>Total</span>
       <span id="cartTotal">₹0</span>
     </div>
@@ -1106,6 +1114,8 @@
     const count = cart.reduce((s,i) => s+i.qty, 0);
     const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
     document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartSubtotal').textContent = `₹${subtotal}`;
+    document.getElementById('cartShipping').textContent = shipping===0? ' FREE🎉' : `₹${shipping}`;
     document.getElementById('cartTotal').textContent = `₹${total}`;
     document.getElementById('modalTotal').textContent = `₹${total}`;
 
@@ -1158,7 +1168,9 @@
   }
 
   function openCheckout() {
-    const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const shipping = subtotal >= 999 ? 0 :  99;
+    const total = subtotal + shipping;
     if (!cart.length) { showToast('Please add items first! 😊'); return; }
     if (total < 300) { showToast('⚠️ Minimum order is ₹300!'); return; }
     closeCart();
