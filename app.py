@@ -8,8 +8,8 @@ app.secret_key = 'rawmaterials-secret-2026'
 DB_PATH = 'store.db'
 
 # ── ADMIN CREDENTIALS ──
-ADMIN_USERNAME = 'ayush123'
-ADMIN_PASSWORD = 'ayush123'
+ADMIN_USERNAME = 'Ayush'
+ADMIN_PASSWORD = '@yush2006'
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
