@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: linear-gradient(135deg, #fff0f6, #f3e8ff); display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; }
+    .card { background: white; border-radius: 24px; padding: 2.5rem 2rem; width: min(400px, 92vw); box-shadow: 0 20px 60px rgba(255,107,157,0.15); text-align: center; }
+    .logo { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    h1 { font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 800; color: #ff6b9d; margin-bottom: 0.3rem; }
+    p.sub { font-size: 0.82rem; color: #8b5a7a; margin-bottom: 1.8rem; }
+    .form-group { margin-bottom: 1rem; text-align: left; }
+    label { font-size: 0.72rem; font-weight: 700; color: #8b5a7a; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.4rem; }
+    input { width: 100%; padding: 0.8rem 1rem; border: 2px solid #fce7f3; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.3s; }
+    input:focus { border-color: #ff6b9d; }
+    .error { background: #fef2f2; border: 1.5px solid #fca5a5; color: #dc2626; border-radius: 10px; padding: 0.7rem 1rem; font-size: 0.82rem; margin-bottom: 1rem; font-weight: 600; }
+    button { width: 100%; background: linear-gradient(135deg, #ff6b9d, #ff4585); color: white; border: none; padding: 1rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(255,107,157,0.4); transition: transform 0.2s; }
+    button:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🌸</div>
+    <h1>Raw Materials Admin</h1>
+    <p class="sub">Sirf authorized log hi andar aa sakte hain</p>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter username" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter password" required/>
+      </div>
+      <button type="submit">Login karo</button>
+    </form>
+  </div>
+</body>
+</html>
