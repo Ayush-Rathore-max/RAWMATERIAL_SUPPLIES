@@ -3,178 +3,371 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RAWMATERIAL_SUPPLIES — Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>Admin Panel 🌸 Raw Materials</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --cream: #f5f0e8; --dark: #1a1612; --muted: #6b6257; --accent: #c8a96e; --border: #e8e0d0; --card: #faf7f2; }
-    body { background: #f0ebe0; font-family: 'DM Sans', sans-serif; color: var(--dark); }
-    header { background: var(--dark); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-family: 'Cormorant Garamond', serif; color: var(--accent); font-size: 1.5rem; letter-spacing: 0.2em; }
-    header a { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; }
-    header a:hover { color: var(--cream); }
-    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-    .card { background: var(--card); border: 1px solid var(--border); padding: 1.8rem; }
-    .card h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    :root {
+      --pink: #e8547a; --purple: #7c5cbf; --yellow: #f5a623;
+      --mint: #34d399; --bg: #fdf6f9; --dark: #2d1b35;
+      --muted: #7a5068; --border: #f0d6e4;
+      --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+    }
+    body { background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--dark); }
+
+    header { background: linear-gradient(135deg, var(--dark), #4a2060); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(45,27,53,0.3); flex-wrap: wrap; gap: 0.5rem; }
+    header h1 { font-family: 'Baloo 2', cursive; color: var(--pink); font-size: 1.5rem; font-weight: 800; }
+    .header-links { display: flex; gap: 0.8rem; align-items: center; }
+    header a { color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 600; text-decoration: none; background: rgba(255,255,255,0.1); padding: 0.4rem 1rem; border-radius: 20px; transition: all 0.2s; }
+    header a:hover { background: var(--pink); color: white; }
+    .btn-reset { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1.5px solid rgba(239,68,68,0.35); font-size: 0.78rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 20px; font-family: 'Nunito', sans-serif; transition: all 0.2s; }
+    .btn-reset:hover { background: var(--red); color: white; border-color: var(--red); }
+
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: white; border: 2px solid var(--border); border-radius: 18px; padding: 1.2rem 1.3rem; }
+    .stat-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    .stat-num { font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; display: block; line-height: 1; margin-bottom: 0.2rem; }
+    .c-pink  .stat-num { color: var(--pink); }
+    .c-purple .stat-num { color: var(--purple); }
+    .c-green .stat-num { color: var(--green); }
+    .c-yellow .stat-num { color: var(--yellow); }
+    .c-blue  .stat-num { color: var(--blue); }
+    .stat-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+
+    /* CARD */
+    .card { background: white; border: 2px solid var(--border); border-radius: 18px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card-title { font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--dark); }
+
+    /* MONTHLY */
+    .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 1rem; }
+    .month-card { background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; transition: all 0.2s; }
+    .month-card:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(232,84,122,0.12); }
+    .month-name { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.92rem; color: var(--dark); margin-bottom: 0.5rem; }
+    .m-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem; }
+    .m-row span:first-child { color: var(--muted); }
+    .vg { color: var(--green); font-weight: 800; }
+    .vp { color: var(--purple); font-weight: 800; }
+    .vb { color: var(--blue); font-weight: 700; }
+    .bar-wrap { height: 5px; background: var(--border); border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--purple)); border-radius: 3px; }
+
+    /* GRID 2 */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    /* FORM */
     .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
-    .form-group input, .form-group select { width: 100%; background: var(--cream); border: 1px solid var(--border); padding: 0.7rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--dark); outline: none; transition: border-color 0.3s; }
-    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
-    .btn { background: var(--dark); color: var(--cream); border: none; padding: 0.8rem 1.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; width: 100%; margin-top: 0.5rem; transition: background 0.3s; }
-    .btn:hover { background: var(--accent); }
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    th { text-align: left; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+    .form-group label { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; }
+    .form-group input, .form-group select { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 0.65rem 0.9rem; font-family: 'Nunito', sans-serif; font-size: 0.88rem; color: var(--dark); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--pink); }
+    .btn-add { background: linear-gradient(135deg, var(--pink), #d4466a); color: white; border: none; padding: 0.85rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; width: 100%; margin-top: 0.2rem; transition: all 0.3s; box-shadow: 0 4px 15px rgba(232,84,122,0.35); }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(232,84,122,0.5); }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { text-align: left; font-size: 0.63rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--border); font-weight: 700; white-space: nowrap; }
     td { padding: 0.75rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
-    .del-btn { background: none; border: 1px solid #ddd; color: #999; padding: 0.3rem 0.7rem; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
-    .del-btn:hover { border-color: #c0392b; color: #c0392b; }
-    .full { grid-column: 1 / -1; }
-    .badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent); color: white; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .stat { background: var(--card); border: 1px solid var(--border); padding: 1.2rem 1.5rem; }
-    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; color: var(--accent); }
-    .stat-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
-    .order-items { font-size: 0.75rem; color: var(--muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tr:hover td { background: var(--bg); }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.65rem; font-weight: 700; border-radius: 20px; text-transform: uppercase; }
+    .badge-pur { background: #f3e8ff; color: var(--purple); }
+    .del-btn { background: #fef2f2; border: 1.5px solid #fecaca; color: var(--red); padding: 0.3rem 0.7rem; font-size: 0.7rem; font-weight: 700; border-radius: 15px; transition: all 0.2s; font-family: 'Nunito', sans-serif; }
+    .del-btn:hover { background: var(--red); color: white; border-color: var(--red); }
+    .status-sel { border: 1.5px solid var(--border); border-radius: 10px; padding: 0.3rem 0.5rem; font-size: 0.76rem; font-family: 'Nunito', sans-serif; background: white; color: var(--dark); outline: none; }
+
+    /* CONFIRM MODAL */
+    .overlay { position: fixed; inset: 0; background: rgba(45,27,53,0.65); z-index: 500; display: none; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .confirm-box { background: white; border-radius: 20px; padding: 2rem; max-width: 360px; width: 90%; text-align: center; animation: fadeUp 0.3s ease; }
+    .confirm-box h3 { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .confirm-box p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .confirm-btns { display: flex; gap: 0.8rem; justify-content: center; }
+    .btn-yes { background: var(--red); color: white; border: none; padding: 0.7rem 1.8rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; transition: all 0.2s; }
+    .btn-yes:hover { background: #dc2626; transform: translateY(-2px); }
+    .btn-no { background: var(--bg); color: var(--muted); border: 2px solid var(--border); padding: 0.7rem 1.8rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 0.82rem; font-weight: 600; z-index: 999; transition: transform 0.4s; white-space: nowrap; border: 2px solid var(--pink); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @media(max-width:640px) { .grid-2{grid-template-columns:1fr} .container{padding:0 1rem} header{padding:1rem} }
   </style>
 </head>
 <body>
+
 <header>
-  <h1>RAWMATERIAL_SUPPLIES Admin</h1>
-  <a href="/">← Back to Store</a>
+  <h1>🌸 Raw Materials Admin</h1>
+  <div class="header-links">
+    <a href="/">← Store</a>
+    <button class="btn-reset" onclick="openReset()">🗑️ Reset Orders</button>
+  </div>
 </header>
 
 <div class="container">
 
   <!-- STATS -->
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-num">{{ products|length }}</div>
-      <div class="stat-label">Total Products</div>
+  <div class="stats-grid">
+    <div class="stat-card c-pink">
+      <div class="stat-icon">📦</div>
+      <span class="stat-num">{{ products|length }}</span>
+      <div class="stat-label">Products</div>
     </div>
-    <div class="stat">
-      <div class="stat-num">{{ orders|length }}</div>
+    <div class="stat-card c-purple">
+      <div class="stat-icon">🛍️</div>
+      <span class="stat-num">{{ orders|length }}</span>
       <div class="stat-label">Total Orders</div>
     </div>
-    <div class="stat">
-      <div class="stat-num">₹{{ "{:,}".format(orders | sum(attribute='total')) }}</div>
+    <div class="stat-card c-green">
+      <div class="stat-icon">💰</div>
+      <span class="stat-num">₹{{ "{:,}".format(orders | sum(attribute='total')) }}</span>
       <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card c-yellow">
+      <div class="stat-icon">📅</div>
+      <span class="stat-num" id="tmRev">₹0</span>
+      <div class="stat-label">This Month Revenue</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-icon">🛒</div>
+      <span class="stat-num" id="tmOrd">0</span>
+      <div class="stat-label">This Month Orders</div>
     </div>
   </div>
 
-  <div class="grid">
+  <!-- MONTHLY REPORT -->
+  <div class="card">
+    <div class="card-title">📊 Monthly Report</div>
+    <div class="month-grid" id="monthGrid">
+      <p style="color:var(--muted);font-size:0.88rem">Loading...</p>
+    </div>
+  </div>
 
-    <!-- ADD PRODUCT -->
+  <!-- ADD PRODUCT + PRODUCT LIST -->
+  <div class="grid-2">
     <div class="card">
-      <h2>Add New Product</h2>
+      <div class="card-title">➕ Add Product</div>
       <div class="form-group">
         <label>Product Name</label>
-        <input type="text" id="pName" placeholder="e.g. Linen Shirt"/>
+        <input type="text" id="pName" placeholder="e.g. Crystal Beads"/>
       </div>
       <div class="form-group">
         <label>Category</label>
         <select id="pCategory">
-          <option>Tops</option>
-          <option>Bottoms</option>
-          <option>Dresses</option>
-          <option>Outerwear</option>
-          <option>Accessories</option>
+          <option>Beads</option>
+          <option>Glass Beads</option>
+          <option>Pipe Cleaners</option>
+          <option>Locks</option>
+          <option>Earrings</option>
+          <option>Charms</option>
+          <option>Other</option>
         </select>
       </div>
       <div class="form-group">
         <label>Price (₹)</label>
-        <input type="number" id="pPrice" placeholder="1299"/>
+        <input type="number" id="pPrice" placeholder="10"/>
       </div>
       <div class="form-group">
-        <label>Emoji Icon</label>
-        <input type="text" id="pEmoji" placeholder="👕" maxlength="2"/>
+        <label>Emoji</label>
+        <input type="text" id="pEmoji" placeholder="📿" maxlength="4"/>
       </div>
-      <button class="btn" onclick="addProduct()">Add Product</button>
+      <div class="form-group">
+        <label>Card Color</label>
+        <input type="color" id="pColor" value="#f9c4d2" style="height:44px;padding:0.3rem;border-radius:8px;"/>
+      </div>
+      <button class="btn-add" onclick="addProduct()">➕ Add Product</button>
     </div>
 
-    <!-- PRODUCTS LIST -->
     <div class="card">
-      <h2>All Products</h2>
+      <div class="card-title">🛍️ Products ({{ products|length }})</div>
       <table id="productsTable">
         <thead>
-          <tr>
-            <th>Product</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th></th>
-          </tr>
+          <tr><th>Product</th><th>Category</th><th>Price</th><th></th></tr>
         </thead>
         <tbody>
           {% for p in products %}
           <tr id="row-{{ p.id }}">
-            <td>{{ p.emoji }} {{ p.name }}</td>
-            <td><span class="badge">{{ p.category }}</span></td>
-            <td>₹{{ "{:,}".format(p.price) }}</td>
-            <td><button class="del-btn" onclick="deleteProduct({{ p.id }})">Delete</button></td>
+            <td><span style="font-size:1.1rem">{{ p.emoji }}</span> {{ p.name }}</td>
+            <td><span class="badge badge-pur">{{ p.category }}</span></td>
+            <td><strong>₹{{ p.price }}</strong></td>
+            <td><button class="del-btn" onclick="deleteProduct({{ p.id }})">🗑</button></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+  </div>
 
-    <!-- ORDERS -->
-    <div class="card full">
-      <h2>Recent Orders</h2>
-      {% if orders %}
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for o in orders %}
-          <tr>
-            <td><strong>#{{ o.id }}</strong></td>
-            <td>{{ o.name }}</td>
-            <td>{{ o.phone }}</td>
-            <td>{{ o.address[:40] }}{% if o.address|length > 40 %}...{% endif %}</td>
-            <td class="order-items">{{ o.items_json }}</td>
-            <td><strong>₹{{ "{:,}".format(o.total) }}</strong></td>
-            <td>{{ o.created_at[:10] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p style="color:var(--muted); font-style:italic; text-align:center; padding:2rem">Abhi koi order nahi aaya.</p>
-      {% endif %}
+  <!-- ORDERS -->
+  <div class="card">
+    <div class="card-title">📋 All Orders ({{ orders|length }})</div>
+    {% if orders %}
+    <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Customer</th><th>Phone</th><th>Address</th>
+          <th>Items</th><th>Total</th><th>Date</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><strong style="color:var(--pink)">#{{ o.id }}</strong></td>
+          <td><strong>{{ o.name }}</strong></td>
+          <td>{{ o.phone }}</td>
+          <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ o.address[:35] }}{% if o.address|length > 35 %}...{% endif %}
+          </td>
+          <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem;color:var(--muted)">
+            {{ o.items_json[:50] }}...
+          </td>
+          <td><strong style="color:var(--pink)">₹{{ "{:,}".format(o.total) }}</strong></td>
+          <td style="white-space:nowrap;font-size:0.78rem">{{ o.created_at[:10] }}</td>
+          <td>
+            <select class="status-sel" onchange="updateStatus({{ o.id }}, this.value)">
+              <option value="Pending"   {% if o.status=='Pending'   %}selected{% endif %}>⏳ Pending</option>
+              <option value="Confirmed" {% if o.status=='Confirmed' %}selected{% endif %}>✅ Confirmed</option>
+              <option value="Shipped"   {% if o.status=='Shipped'   %}selected{% endif %}>🚚 Shipped</option>
+              <option value="Delivered" {% if o.status=='Delivered' %}selected{% endif %}>📦 Delivered</option>
+              <option value="Cancelled" {% if o.status=='Cancelled' %}selected{% endif %}>❌ Cancelled</option>
+            </select>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     </div>
+    {% else %}
+    <p style="text-align:center;color:var(--muted);padding:2.5rem;font-style:italic">Abhi koi order nahi aaya 😊</p>
+    {% endif %}
+  </div>
 
+</div>
+
+<!-- RESET CONFIRM -->
+<div class="overlay" id="resetOverlay">
+  <div class="confirm-box">
+    <h3>🗑️ Orders Reset?</h3>
+    <p>
+      Saare <strong>{{ orders|length }} orders</strong> permanently delete ho jayenge.<br/>
+      Yeh undo <strong>nahi</strong> ho sakta!<br/>
+      <span style="color:var(--green);font-weight:700">✅ Products safe rahenge.</span>
+    </p>
+    <div class="confirm-btns">
+      <button class="btn-yes" onclick="doReset()">Haan, Reset Karo</button>
+      <button class="btn-no" onclick="closeReset()">Cancel</button>
+    </div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+  // Orders data from Flask
+  const ordersData = {{ orders | tojson }};
+
+  // ── MONTHLY ANALYTICS ──
+  (function() {
+    const map = {};
+    ordersData.forEach(o => {
+      const key = (o.created_at || '').slice(0, 7);
+      if (!key || key.length < 7) return;
+      if (!map[key]) map[key] = { orders: 0, revenue: 0 };
+      map[key].orders++;
+      map[key].revenue += (o.total || 0);
+    });
+
+    const keys = Object.keys(map).sort().reverse();
+    const maxRev = Math.max(...Object.values(map).map(v => v.revenue), 1);
+    const MN = ['','January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+    const grid = document.getElementById('monthGrid');
+    if (!keys.length) {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:0.88rem">Abhi koi data nahi. Pehla order aane ke baad report dikhe gi! 🌸</p>';
+      return;
+    }
+
+    grid.innerHTML = keys.map(k => {
+      const [yr, mo] = k.split('-');
+      const label = (MN[parseInt(mo)] || mo) + ' ' + yr;
+      const d = map[k];
+      const pct = Math.round((d.revenue / maxRev) * 100);
+      const avg = Math.round(d.revenue / d.orders);
+      return `
+        <div class="month-card">
+          <div class="month-name">📅 ${label}</div>
+          <div class="m-row"><span>Orders</span><span class="vp">${d.orders}</span></div>
+          <div class="m-row"><span>Revenue</span><span class="vg">₹${d.revenue.toLocaleString('en-IN')}</span></div>
+          <div class="m-row"><span>Avg Order</span><span class="vb">₹${avg}</span></div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+        </div>`;
+    }).join('');
+
+    // This month
+    const now = new Date();
+    const tk = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    const tm = map[tk];
+    document.getElementById('tmRev').textContent = tm ? `₹${tm.revenue.toLocaleString('en-IN')}` : '₹0';
+    document.getElementById('tmOrd').textContent = tm ? tm.orders : '0';
+  })();
+
+  // ── ADD PRODUCT ──
   async function addProduct() {
-    const name     = document.getElementById('pName').value.trim();
-    const category = document.getElementById('pCategory').value;
-    const price    = document.getElementById('pPrice').value.trim();
-    const emoji    = document.getElementById('pEmoji').value.trim() || '👕';
-    if (!name || !price) { alert('Name aur price bharo!'); return; }
+    const name  = document.getElementById('pName').value.trim();
+    const cat   = document.getElementById('pCategory').value;
+    const price = document.getElementById('pPrice').value.trim();
+    const emoji = document.getElementById('pEmoji').value.trim() || '🧶';
+    const color = document.getElementById('pColor').value;
+    if (!name || !price) { showToast('❌ Name aur price bharo!'); return; }
     const fd = new FormData();
-    fd.append('name', name); fd.append('category', category);
-    fd.append('price', price); fd.append('emoji', emoji);
-    const res = await fetch('/admin/add-product', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (data.success) { location.reload(); }
+    fd.append('name',name); fd.append('category',cat);
+    fd.append('price',price); fd.append('emoji',emoji); fd.append('color',color);
+    const r = await fetch('/admin/add-product',{method:'POST',body:fd});
+    const d = await r.json();
+    if (d.success) { showToast('✅ Product add ho gaya!'); setTimeout(()=>location.reload(),900); }
+    else showToast('❌ '+(d.error||'Error'));
   }
 
+  // ── DELETE PRODUCT ──
   async function deleteProduct(id) {
     if (!confirm('Delete karna hai?')) return;
-    const res = await fetch(`/admin/delete-product/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (data.success) { document.getElementById(`row-${id}`).remove(); }
+    const r = await fetch(`/admin/delete-product/${id}`,{method:'DELETE'});
+    const d = await r.json();
+    if (d.success) { document.getElementById(`row-${id}`).remove(); showToast('🗑 Deleted!'); }
+  }
+
+  // ── UPDATE STATUS ──
+  async function updateStatus(id, status) {
+    const r = await fetch(`/admin/update-order-status/${id}`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({status})
+    });
+    const d = await r.json();
+    if (d.success) showToast(`✅ Status: ${status}`);
+  }
+
+  // ── RESET ORDERS ──
+  function openReset()  { document.getElementById('resetOverlay').classList.add('open'); }
+  function closeReset() { document.getElementById('resetOverlay').classList.remove('open'); }
+
+  async function doReset() {
+    closeReset();
+    const r = await fetch('/admin/reset-orders',{method:'POST'});
+    const d = await r.json();
+    if (d.success) { showToast('✅ Orders reset ho gaye!'); setTimeout(()=>location.reload(),1200); }
+    else showToast('❌ '+(d.error||'Error'));
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2500);
   }
 </script>
 </body>
