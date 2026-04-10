@@ -115,10 +115,10 @@
     /* CATEGORIES */
     .categories { display:flex; gap:1rem; padding:1rem 2rem 2rem; overflow-x:auto; scrollbar-width:none; }
     .categories::-webkit-scrollbar { display:none; }
-    .cat-card { flex-shrink:0; background:white; border:2px solid var(--border); border-radius:16px; padding:1rem 1.5rem; text-align:center; min-width:110px; transition:all 0.3s; }
-    .cat-card:hover, .cat-card.active { border-color:var(--pink); background:var(--pink); color:white; transform:translateY(-4px); box-shadow:0 8px 25px rgba(232,84,122,0.3); }
-    .cat-emoji { font-size:1.8rem; display:block; margin-bottom:0.4rem; }
-    .cat-name { font-size:0.75rem; font-weight:700; }
+    .cat-card { flex-shrink:0; background:white; border:2px solid var(--border); border-radius:50%; width:64px; height:64px; text-align:center; transition:all 0.3s; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .cat-card:hover, .cat-card.active { border-color:var(--pink); background:var(--pink); transform:translateY(-4px) scale(1.1); box-shadow:0 8px 25px rgba(232,84,122,0.3); }
+    .cat-emoji { font-size:1.8rem; display:block; }
+    .cat-name { display:none; }
 
     /* PRODUCTS */
     .products { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.2rem; padding:0 2rem 3rem; }
@@ -359,7 +359,7 @@
   <div class="contact-card">
     <div class="icon">✉️</div>
     <strong>Email</strong>
-    <a href="mailto:rawmaterialsupplies@gmail.com">rawmaterialsupplies@gmail.com</a>
+    <a href="/cdn-cgi/l/email-protection#087a697f65697c6d7a6169647b7d787864616d7b486f65696164266b6765"><span class="__cf_email__" data-cfemail="3e4c5f49535f4a5b4c575f524d4b4e4e52575b4d7e59535f5752105d5153">[email&#160;protected]</span></a>
     <p style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">Bulk orders ke liye</p>
   </div>
 </div>
@@ -425,6 +425,67 @@
   <button onclick="submitReview()" style="background:linear-gradient(135deg,#e8547a,#d4466a);color:white;border:none;padding:0.9rem 2rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(232,84,122,0.3)">Submit Review ⭐</button>
 </div>
 
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal-overlay" id="productModal" style="position:fixed;inset:0;background:rgba(45,27,53,0.6);z-index:400;display:none;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto">
+  <div style="background:white;border-radius:24px;width:min(600px,95vw);margin:2rem auto;overflow:hidden;animation:fadeUp 0.3s ease">
+    <!-- Product Images -->
+    <div id="pdImages" style="width:100%;aspect-ratio:1;background:#fdf6f9;position:relative;overflow:hidden">
+      <div id="pdMainImg" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:6rem"></div>
+    </div>
+    <!-- Thumbnail strip -->
+    <div id="pdThumbs" style="display:flex;gap:0.5rem;padding:0.8rem 1.2rem;overflow-x:auto;scrollbar-width:none"></div>
+    
+    <div style="padding:1.2rem 1.5rem">
+      <!-- Category + Name -->
+      <p id="pdCat" style="font-size:0.7rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem"></p>
+      <h2 id="pdName" style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--dark);margin-bottom:0.5rem"></h2>
+      
+      <!-- Price -->
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">
+        <span id="pdPrice" style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--pink)"></span>
+        <span id="pdMrp" style="font-size:1rem;text-decoration:line-through;color:#9ca3af"></span>
+        <span id="pdDiscount" style="background:#dcfce7;color:#065f46;padding:0.2rem 0.6rem;border-radius:10px;font-size:0.75rem;font-weight:700"></span>
+      </div>
+
+      <!-- Variants -->
+      <div id="pdVariantsWrap" style="margin-bottom:1rem">
+        <p style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:0.5rem">Select Quantity</p>
+        <div id="pdVariants" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+      </div>
+
+      <!-- Description -->
+      <div id="pdDescWrap" style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1rem">
+        <p style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:0.4rem">Description</p>
+        <p id="pdDesc" style="font-size:0.88rem;color:var(--dark);line-height:1.7"></p>
+      </div>
+
+      <!-- Shipping + Stock -->
+      <div style="display:flex;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap">
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:0.6rem 1rem;font-size:0.8rem;font-weight:600;color:#065f46">
+          🚚 Ships in <span id="pdShipping"></span>
+        </div>
+        <div id="pdStockBadge" style="border-radius:10px;padding:0.6rem 1rem;font-size:0.8rem;font-weight:600"></div>
+      </div>
+
+      <!-- Add to cart -->
+      <button id="pdAddBtn" onclick="pdAddToCart()" style="width:100%;background:linear-gradient(135deg,var(--pink),#d4466a);color:white;border:none;padding:1.1rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(232,84,122,0.4);margin-bottom:1rem">
+        Add to Bag 🛍️
+      </button>
+
+      <!-- Close -->
+      <button onclick="closeProductPage()" style="width:100%;background:var(--bg);border:2px solid var(--border);color:var(--muted);padding:0.8rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer">
+        ← Back to Shop
+      </button>
+
+      <!-- More like this -->
+      <div style="margin-top:1.5rem">
+        <p style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--dark);margin-bottom:1rem">More like this 🌸</p>
+        <div id="pdMoreLike" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.8rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">Raw Materials Supplies 🌸</div>
@@ -515,7 +576,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── CURSOR ──
   const cursor = document.getElementById('cursor');
   if (cursor && window.matchMedia('(pointer: fine)').matches) {
@@ -554,10 +615,15 @@
       return `
       <div class="product-card" style="animation-delay:${i*0.07}s">
         ${p.badge ? `<div class="product-badge ${p.badge}">${p.badge==='hot'?'🔥 Hot':'✨ New'}</div>` : ''}
-        <div class="product-img" style="background:${bg}">${p.emoji}</div>
+        <div class="product-img" style="background:${bg};cursor:pointer;position:relative;overflow:hidden" onclick="openProductPage(${p.id})">
+          ${p.images && p.images.length > 0
+            ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:4rem;position:absolute;inset:0">${p.emoji}</div>`
+            : `<span style="font-size:4rem">${p.emoji}</span>`
+          }
+        </div>
         <div class="product-info">
           <p class="product-cat">${p.category}</p>
-          <p class="product-name">${p.name}</p>
+          <p class="product-name" style="cursor:pointer" onclick="openProductPage(${p.id})">${p.name}</p>
           <div class="product-bottom">
             <div class="product-price">₹${p.price} <span>/pack</span></div>
             <div id="ctrl-${p.id}">${p.stock <= 0 ? `<button class="add-btn" disabled style="background:#e5e7eb;color:#9ca3af;border-color:#e5e7eb;cursor:not-allowed;box-shadow:none;font-size:0.5rem">Out</button>` : qty > 0 ? qtyHTML(p.id, qty) : `<button class="add-btn" onclick="addToCart(${p.id})">+</button>`}</div>
@@ -602,7 +668,6 @@
   function addToCart(id) {
     const p = products.find(x => x.id === id);
     if (p && p.stock <= 0) { showToast('Ye product out of stock hai! 😔'); return; }
-    const p = products.find(x => x.id === id);
     const ex = cart.find(x => x.id === id);
     if (ex) ex.qty++;
     else cart.push({...p, qty:1});
@@ -787,14 +852,4 @@
             <small style="color:#7a5068">${r.created_at.slice(0,10)}</small>
           </div>
           ${r.review_text ? `<p style="color:#2d1b35;font-size:0.88rem;margin-top:0.5rem;line-height:1.6">${r.review_text}</p>` : ''}
-          ${r.image_url ? `<img src="${r.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin-top:0.6rem;border:1.5px solid #f0d6e4" onerror="this.style.display='none'"/>` : ''}
-        </div>
-      `).join('');
-    } catch(e) {}
-  }
-
-  loadReviews();
-
-</script>
-</body>
-</html>
+          ${r.image_url ? `<img src="${r.image_
