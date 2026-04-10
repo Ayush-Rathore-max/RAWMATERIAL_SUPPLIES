@@ -77,12 +77,8 @@ def generate_whatsapp_message(order_id, name, phone, address, items, total):
     for item in items:
         lines.append(f"  • {item['name']} x{item['qty']} = ₹{item['price'] * item['qty']}")
     lines.append(f"━━━━━━━━━━━━━━━━━━")
-    shipping = 80
-    subtotal = total - shipping
-    lines.append(f"💰 *Subtotal: ₹{subtotal}*")
-    lines.append(f"🚚 *Shipping: ₹{shipping}*")
-    lines.append(f"💳 *Total Payable: ₹{total}*")
-    lines.append(f"⚠️ No COD | No Return/Exchange")
+    lines.append(f"💰 *Total Amount: ₹{total}*")
+    lines.append(f"⚠️ Minimum order ₹300 | No COD/Return/Exchange")
     return "\n".join(lines)
 
 # ── ROUTES ──
@@ -157,9 +153,12 @@ def place_order():
 def admin():
     conn = get_db()
     products = conn.execute('SELECT * FROM products').fetchall()
-    orders   = conn.execute('SELECT * FROM orders ORDER BY created_at DESC').fetchall()
+    orders_raw = conn.execute('SELECT * FROM orders ORDER BY created_at DESC').fetchall()
     conn.close()
-    return render_template('admin.html', products=products, orders=orders)
+    # Convert to dicts so tojson works in template
+    orders = [dict(o) for o in orders_raw]
+    products_list = [dict(p) for p in products]
+    return render_template('admin.html', products=products_list, orders=orders)
 
 
 @app.route('/admin/add-product', methods=['POST'])
@@ -198,6 +197,19 @@ def update_order_status(oid):
     conn.close()
     return jsonify({'success': True, 'message': 'Order status updated!'})
 
+
+
+@app.route("/admin/reset-orders", methods=["POST"])
+def reset_orders():
+    try:
+        conn = get_db()
+        conn.execute("DELETE FROM orders")
+        conn.execute("DELETE FROM sqlite_sequence WHERE name='orders'")
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True, "message": "All orders deleted!"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ── RUN ──
 if __name__ == '__main__':
