@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect
 import sqlite3
 import os
 import json
@@ -10,6 +10,29 @@ app.secret_key = 'rawmaterials-secret-key-change-this'
 DB_PATH = 'store.db'
 
 WHATSAPP_NUMBER = '917838133167'  # Priya didi's number
+# ── ADMIN CREDENTIALS ──
+ADMIN_USERNAME = 'priya'
+ADMIN_PASSWORD = 'rawmaterials2024'
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if session.get('admin_logged_in'):
+        return redirect('/admin')
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            return redirect('/admin')
+        return render_template('admin_login.html', error='❌ Wrong username or password!')
+    return render_template('admin_login.html', error=None)
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect('/admin/login')
+
+
 
 # ── DATABASE SETUP ──
 def get_db():
@@ -151,6 +174,8 @@ def place_order():
 
 @app.route('/admin')
 def admin():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin/login')
     conn = get_db()
     products = conn.execute('SELECT * FROM products').fetchall()
     orders_raw = conn.execute('SELECT * FROM orders ORDER BY created_at DESC').fetchall()
