@@ -55,6 +55,9 @@
     .cat-del:hover{color:#ef4444}
     .star-display{color:var(--yellow);font-size:0.9rem}
     .review-img{width:50px;height:50px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)}
+
+    .card-title{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--dark);margin-bottom:1rem}
+    .month-grid{display:flex;flex-wrap:wrap;gap:0.8rem;overflow-x:auto}
     @media(max-width:640px){
       .form-row{grid-template-columns:1fr}
       .tabs{padding:0 1rem}
@@ -357,33 +360,30 @@
     });
 
     const keys = Object.keys(monthMap).sort().reverse();
-    const tbody = document.getElementById('monthlyBody');
+    const monthGrid = document.getElementById('monthGrid');
 
     if (!keys.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-style:italic">Abhi koi orders nahi hain!</td></tr>';
+      monthGrid.innerHTML = '<p style="color:var(--muted);font-style:italic;text-align:center;padding:1rem">Abhi koi orders nahi hain!</p>';
       return;
     }
 
     const maxRev = Math.max(...keys.map(k => monthMap[k].revenue));
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    tbody.innerHTML = keys.map(key => {
+    monthGrid.innerHTML = keys.map(key => {
       const d = monthMap[key];
       const avg = Math.round(d.revenue / d.orders);
       const barWidth = maxRev > 0 ? Math.round((d.revenue / maxRev) * 100) : 0;
       const [year, month] = key.split('-');
-      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const monthName = monthNames[parseInt(month)-1] + ' ' + year;
-      return `<tr>
-        <td><strong>${monthName}</strong></td>
-        <td>${d.orders} orders</td>
-        <td><strong style="color:var(--pink)">₹${d.revenue.toLocaleString('en-IN')}</strong></td>
-        <td>₹${avg.toLocaleString('en-IN')}</td>
-        <td>
-          <div style="background:#fce7f3;border-radius:10px;height:12px;width:150px;overflow:hidden">
-            <div style="background:linear-gradient(90deg,var(--pink),var(--purple));height:100%;width:${barWidth}%;border-radius:10px;transition:width 0.5s"></div>
-          </div>
-        </td>
-      </tr>`;
+      return `<div style="background:var(--bg);border:2px solid var(--border);border-radius:14px;padding:1rem;min-width:160px">
+        <div style="font-family:'Baloo 2',cursive;font-size:0.9rem;font-weight:700;color:var(--muted);margin-bottom:0.6rem">${monthName}</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--pink)">₹${d.revenue.toLocaleString('en-IN')}</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin:0.3rem 0">${d.orders} orders · Avg ₹${avg}</div>
+        <div style="background:#fce7f3;border-radius:10px;height:8px;overflow:hidden;margin-top:0.5rem">
+          <div style="background:linear-gradient(90deg,var(--pink),var(--purple));height:100%;width:${barWidth}%;border-radius:10px"></div>
+        </div>
+      </div>`;
     }).join('');
   }
 
