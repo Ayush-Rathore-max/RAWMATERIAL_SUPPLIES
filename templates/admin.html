@@ -111,6 +111,15 @@
     </div>
   </div>
 
+
+  <!-- MONTHLY REPORT -->
+  <div class="card">
+    <div class="card-title">📊 Monthly Report</div>
+    <div class="month-grid" id="monthGrid">
+      <p style="color:var(--muted);font-size:0.88rem">Loading...</p>
+    </div>
+  </div>
+
   <div class="card">
     <h3>⚠️ Recent Orders</h3>
     <table>
@@ -332,7 +341,55 @@
 </div>
 
 <script>
-function showTab(name) {
+
+  // ── MONTHLY ANALYTICS ──
+  function buildMonthlyReport() {
+    const orders = {{ orders | tojson }};
+    const monthMap = {};
+
+    orders.forEach(o => {
+      if (!o.created_at) return;
+      const date = new Date(o.created_at);
+      const key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+      if (!monthMap[key]) monthMap[key] = { orders: 0, revenue: 0 };
+      monthMap[key].orders++;
+      monthMap[key].revenue += o.total;
+    });
+
+    const keys = Object.keys(monthMap).sort().reverse();
+    const tbody = document.getElementById('monthlyBody');
+
+    if (!keys.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-style:italic">Abhi koi orders nahi hain!</td></tr>';
+      return;
+    }
+
+    const maxRev = Math.max(...keys.map(k => monthMap[k].revenue));
+
+    tbody.innerHTML = keys.map(key => {
+      const d = monthMap[key];
+      const avg = Math.round(d.revenue / d.orders);
+      const barWidth = maxRev > 0 ? Math.round((d.revenue / maxRev) * 100) : 0;
+      const [year, month] = key.split('-');
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthName = monthNames[parseInt(month)-1] + ' ' + year;
+      return `<tr>
+        <td><strong>${monthName}</strong></td>
+        <td>${d.orders} orders</td>
+        <td><strong style="color:var(--pink)">₹${d.revenue.toLocaleString('en-IN')}</strong></td>
+        <td>₹${avg.toLocaleString('en-IN')}</td>
+        <td>
+          <div style="background:#fce7f3;border-radius:10px;height:12px;width:150px;overflow:hidden">
+            <div style="background:linear-gradient(90deg,var(--pink),var(--purple));height:100%;width:${barWidth}%;border-radius:10px;transition:width 0.5s"></div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  buildMonthlyReport();
+
+  function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
