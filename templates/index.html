@@ -289,7 +289,7 @@
   <span class="floating-emoji" style="top:20%;right:8%;animation-delay:1s">🌸</span>
   <span class="floating-emoji" style="bottom:20%;left:8%;animation-delay:2s">✨</span>
   <span class="floating-emoji" style="bottom:25%;right:5%;animation-delay:0.5s">🎀</span>
-  <img src="/static/logo.png" alt="Raw Materials Supplies" class="hero-logo" onerror="this.style.display='none'"/>
+  
   <div class="hero-badge">⚡ Starting at just ₹1/-</div>
   <h1>Craft supplies<br/>for <span>every creator</span> ✨</h1>
   <p class="hero-sub">Jewellery making, pipe cleaners, glass beads, locks & more! Pan India delivery 🚚</p>
@@ -337,22 +337,6 @@
   <h2 class="section-title">Our Products</h2>
 </div>
 <div class="products" id="productGrid"></div>
-
-<!-- ABOUT -->
-<div class="section-header" id="about">
-  <div class="section-tag">💌 Our Story</div>
-  <h2 class="section-title">About Us 🌸</h2>
-</div>
-
-  <div class="about-tags">
-    <span class="about-tag">🌸 Since 2022</span>
-    <span class="about-tag">📦 Pan India Delivery</span>
-    <span class="about-tag">💎 Quality Assured</span>
-    <span class="about-tag">🎀 37K+ Community</span>
-    <span class="about-tag">⚡ Starts at ₹1/-</span>
-    <span class="about-tag">🤝 Trusted Seller</span>
-  </div>
-</div>
 
 <!-- CONTACT -->
 <div class="section-header" id="contact">
@@ -403,6 +387,42 @@
   <div class="trust-item"><div class="trust-icon">🚚</div><strong>Pan India Delivery</strong><span>All states covered</span></div>
   <div class="trust-item"><div class="trust-icon">💸</div><strong>Starts at ₹1/-</strong><span>Affordable for all</span></div>
   <div class="trust-item"><div class="trust-icon">🌸</div><strong>37K+ Followers</strong><span>Trusted community</span></div>
+</div>
+
+
+<!-- REVIEWS -->
+<div class="section-header" id="reviews">
+  <div class="section-tag">⭐ Customer Love</div>
+  <h2 class="section-title">Reviews</h2>
+</div>
+
+<div style="padding:0 2rem 1rem;max-width:900px;margin:0 auto" id="reviewsList"></div>
+
+<div class="card" style="margin:0 2rem 3rem;max-width:900px;margin-left:auto;margin-right:auto;background:white;border:2px solid #f0d6e4;border-radius:20px;padding:1.5rem">
+  <h3 style="font-family:'Baloo 2',cursive;font-size:1.2rem;margin-bottom:1rem;color:#2d1b35">✍️ Write a Review</h3>
+  <div style="margin-bottom:0.8rem">
+    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.3rem">Your Name</label>
+    <input type="text" id="revName" placeholder="Priya, Anjali..." style="width:100%;padding:0.7rem 1rem;border:2px solid #f0d6e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none"/>
+  </div>
+  <div style="margin-bottom:0.8rem">
+    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.5rem">Rating</label>
+    <div id="starPicker" style="display:flex;gap:0.3rem;font-size:2rem;cursor:pointer">
+      <span onclick="setRating(1)" class="star-pick">☆</span>
+      <span onclick="setRating(2)" class="star-pick">☆</span>
+      <span onclick="setRating(3)" class="star-pick">☆</span>
+      <span onclick="setRating(4)" class="star-pick">☆</span>
+      <span onclick="setRating(5)" class="star-pick">☆</span>
+    </div>
+  </div>
+  <div style="margin-bottom:0.8rem">
+    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.3rem">Your Review</label>
+    <textarea id="revText" placeholder="Aapka experience kaisa tha? Products kaisi thi?" style="width:100%;padding:0.7rem 1rem;border:2px solid #f0d6e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;resize:vertical;min-height:80px"></textarea>
+  </div>
+  <div style="margin-bottom:1rem">
+    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.3rem">Photo URL (optional)</label>
+    <input type="text" id="revImage" placeholder="https://... (apni photo ka link)" style="width:100%;padding:0.7rem 1rem;border:2px solid #f0d6e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none"/>
+  </div>
+  <button onclick="submitReview()" style="background:linear-gradient(135deg,#e8547a,#d4466a);color:white;border:none;padding:0.9rem 2rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(232,84,122,0.3)">Submit Review ⭐</button>
 </div>
 
 <!-- FOOTER -->
@@ -712,6 +732,67 @@
   track.innerHTML = [...mItems,...mItems].map(i => `<span class="marquee-item">${i}</span><span class="marquee-sep"> ✿ </span>`).join('').repeat(2);
 
   loadProducts();
+
+  // ── REVIEWS ──
+  let selectedRating = 0;
+
+  function setRating(r) {
+    selectedRating = r;
+    const stars = document.querySelectorAll('.star-pick');
+    stars.forEach((s, i) => { s.textContent = i < r ? '⭐' : '☆'; });
+  }
+
+  async function submitReview() {
+    const name = document.getElementById('revName').value.trim();
+    const text = document.getElementById('revText').value.trim();
+    const imageUrl = document.getElementById('revImage').value.trim();
+    if (!name) { showToast('Naam daalo!'); return; }
+    if (!selectedRating) { showToast('Rating select karo!'); return; }
+    try {
+      const res = await fetch('/api/review', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({product_id:1, name, rating:selectedRating, text, image_url:imageUrl})
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✅ Review submit ho gayi! Shukriya! 🌸');
+        document.getElementById('revName').value = '';
+        document.getElementById('revText').value = '';
+        document.getElementById('revImage').value = '';
+        setRating(0);
+        loadReviews();
+      }
+    } catch(e) { showToast('Kuch problem hui!'); }
+  }
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/reviews/1');
+      const reviews = await res.json();
+      const el = document.getElementById('reviewsList');
+      if (!reviews.length) {
+        el.innerHTML = '<p style="text-align:center;color:#7a5068;font-style:italic;padding:1rem">Pehle review dene wale bano! 🌸</p>';
+        return;
+      }
+      el.innerHTML = reviews.map(r => `
+        <div style="background:white;border:2px solid #f0d6e4;border-radius:16px;padding:1.2rem;margin-bottom:0.8rem">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem">
+            <div>
+              <strong style="font-size:0.95rem">${r.reviewer_name}</strong>
+              <div style="color:#f5a623;font-size:1rem;margin:0.2rem 0">${'⭐'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            </div>
+            <small style="color:#7a5068">${r.created_at.slice(0,10)}</small>
+          </div>
+          ${r.review_text ? `<p style="color:#2d1b35;font-size:0.88rem;margin-top:0.5rem;line-height:1.6">${r.review_text}</p>` : ''}
+          ${r.image_url ? `<img src="${r.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin-top:0.6rem;border:1.5px solid #f0d6e4" onerror="this.style.display='none'"/>` : ''}
+        </div>
+      `).join('');
+    } catch(e) {}
+  }
+
+  loadReviews();
+
 </script>
 </body>
 </html>

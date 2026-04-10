@@ -3,372 +3,407 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel 🌸 Raw Materials</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <title>Admin Panel 🌸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --pink: #e8547a; --purple: #7c5cbf; --yellow: #f5a623;
-      --mint: #34d399; --bg: #fdf6f9; --dark: #2d1b35;
-      --muted: #7a5068; --border: #f0d6e4;
-      --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--pink:#e8547a;--purple:#7c5cbf;--yellow:#f5a623;--mint:#10b981;--bg:#fdf6f9;--dark:#2d1b35;--muted:#7a5068;--border:#f0d6e4;--card:#fff}
+    body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--dark)}
+    header{background:var(--dark);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+    header h1{font-family:'Baloo 2',cursive;color:var(--pink);font-size:1.4rem;letter-spacing:0.1em}
+    header a{color:rgba(255,255,255,0.6);font-size:0.75rem;text-decoration:none;padding:0.4rem 1rem;border:1px solid rgba(255,255,255,0.2);border-radius:20px;transition:all 0.2s}
+    header a:hover{color:white;border-color:white}
+    .tabs{display:flex;gap:0;background:white;border-bottom:2px solid var(--border);padding:0 2rem;overflow-x:auto}
+    .tab{padding:0.9rem 1.4rem;font-size:0.82rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s}
+    .tab.active{color:var(--pink);border-bottom-color:var(--pink)}
+    .tab-content{display:none;padding:1.5rem 2rem}
+    .tab-content.active{display:block}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat{background:white;border:2px solid var(--border);border-radius:16px;padding:1.2rem;text-align:center}
+    .stat-num{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--pink);display:block}
+    .stat-label{font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+    .card{background:white;border:2px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.2rem}
+    .card h3{font-family:'Baloo 2',cursive;font-size:1.2rem;margin-bottom:1.2rem;color:var(--dark)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-group{margin-bottom:0.9rem}
+    .form-group label{display:block;font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem}
+    .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;font-family:'Nunito',sans-serif;font-size:0.88rem;color:var(--dark);outline:none;transition:border-color 0.2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--pink)}
+    .form-group textarea{resize:vertical;min-height:70px}
+    .form-hint{font-size:0.68rem;color:var(--muted);margin-top:0.2rem}
+    .btn{border:none;padding:0.7rem 1.5rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+    .btn-pink{background:linear-gradient(135deg,var(--pink),#d4466a);color:white;box-shadow:0 4px 12px rgba(232,84,122,0.3)}
+    .btn-pink:hover{transform:translateY(-2px)}
+    .btn-red{background:#ef4444;color:white}
+    .btn-red:hover{background:#dc2626}
+    .btn-green{background:var(--mint);color:white}
+    .btn-sm{padding:0.35rem 0.8rem;font-size:0.72rem}
+    table{width:100%;border-collapse:collapse;font-size:0.82rem}
+    th{text-align:left;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:0.6rem 0.8rem;border-bottom:2px solid var(--border)}
+    td{padding:0.7rem 0.8rem;border-bottom:1px solid var(--border);vertical-align:middle}
+    tr:hover td{background:#fdf6f9}
+    .badge{display:inline-block;padding:0.2rem 0.7rem;border-radius:12px;font-size:0.65rem;font-weight:700}
+    .badge-pending{background:#fef3c7;color:#92400e}
+    .badge-confirmed{background:#dbeafe;color:#1e40af}
+    .badge-shipped{background:#d1fae5;color:#065f46}
+    .badge-delivered{background:#ede9fe;color:#5b21b6}
+    .status-select{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;font-size:0.75rem;font-family:'Nunito',sans-serif}
+    .product-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)}
+    .cat-list{display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:1rem}
+    .cat-tag{background:var(--bg);border:1.5px solid var(--border);border-radius:20px;padding:0.4rem 1rem;font-size:0.78rem;font-weight:600;display:flex;align-items:center;gap:0.5rem}
+    .cat-del{background:none;border:none;color:#fca5a5;cursor:pointer;font-size:0.8rem;font-weight:700;transition:color 0.2s}
+    .cat-del:hover{color:#ef4444}
+    .star-display{color:var(--yellow);font-size:0.9rem}
+    .review-img{width:50px;height:50px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)}
+    @media(max-width:640px){
+      .form-row{grid-template-columns:1fr}
+      .tabs{padding:0 1rem}
+      .tab-content{padding:1rem}
+      .stats{grid-template-columns:repeat(2,1fr)}
     }
-    body { background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--dark); }
-
-    header { background: linear-gradient(135deg, var(--dark), #4a2060); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(45,27,53,0.3); flex-wrap: wrap; gap: 0.5rem; }
-    header h1 { font-family: 'Baloo 2', cursive; color: var(--pink); font-size: 1.5rem; font-weight: 800; }
-    .header-links { display: flex; gap: 0.8rem; align-items: center; }
-    header a { color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 600; text-decoration: none; background: rgba(255,255,255,0.1); padding: 0.4rem 1rem; border-radius: 20px; transition: all 0.2s; }
-    header a:hover { background: var(--pink); color: white; }
-    .btn-reset { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1.5px solid rgba(239,68,68,0.35); font-size: 0.78rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 20px; font-family: 'Nunito', sans-serif; transition: all 0.2s; }
-    .btn-reset:hover { background: var(--red); color: white; border-color: var(--red); }
-
-    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
-
-    /* STATS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .stat-card { background: white; border: 2px solid var(--border); border-radius: 18px; padding: 1.2rem 1.3rem; }
-    .stat-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
-    .stat-num { font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; display: block; line-height: 1; margin-bottom: 0.2rem; }
-    .c-pink  .stat-num { color: var(--pink); }
-    .c-purple .stat-num { color: var(--purple); }
-    .c-green .stat-num { color: var(--green); }
-    .c-yellow .stat-num { color: var(--yellow); }
-    .c-blue  .stat-num { color: var(--blue); }
-    .stat-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
-
-    /* CARD */
-    .card { background: white; border: 2px solid var(--border); border-radius: 18px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .card-title { font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--dark); }
-
-    /* MONTHLY */
-    .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 1rem; }
-    .month-card { background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; transition: all 0.2s; }
-    .month-card:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(232,84,122,0.12); }
-    .month-name { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.92rem; color: var(--dark); margin-bottom: 0.5rem; }
-    .m-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem; }
-    .m-row span:first-child { color: var(--muted); }
-    .vg { color: var(--green); font-weight: 800; }
-    .vp { color: var(--purple); font-weight: 800; }
-    .vb { color: var(--blue); font-weight: 700; }
-    .bar-wrap { height: 5px; background: var(--border); border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
-    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--purple)); border-radius: 3px; }
-
-    /* GRID 2 */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-
-    /* FORM */
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; }
-    .form-group input, .form-group select { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 0.65rem 0.9rem; font-family: 'Nunito', sans-serif; font-size: 0.88rem; color: var(--dark); outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group select:focus { border-color: var(--pink); }
-    .btn-add { background: linear-gradient(135deg, var(--pink), #d4466a); color: white; border: none; padding: 0.85rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; width: 100%; margin-top: 0.2rem; transition: all 0.3s; box-shadow: 0 4px 15px rgba(232,84,122,0.35); }
-    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(232,84,122,0.5); }
-
-    /* TABLE */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-    th { text-align: left; font-size: 0.63rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--border); font-weight: 700; white-space: nowrap; }
-    td { padding: 0.75rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--bg); }
-    .badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.65rem; font-weight: 700; border-radius: 20px; text-transform: uppercase; }
-    .badge-pur { background: #f3e8ff; color: var(--purple); }
-    .del-btn { background: #fef2f2; border: 1.5px solid #fecaca; color: var(--red); padding: 0.3rem 0.7rem; font-size: 0.7rem; font-weight: 700; border-radius: 15px; transition: all 0.2s; font-family: 'Nunito', sans-serif; }
-    .del-btn:hover { background: var(--red); color: white; border-color: var(--red); }
-    .status-sel { border: 1.5px solid var(--border); border-radius: 10px; padding: 0.3rem 0.5rem; font-size: 0.76rem; font-family: 'Nunito', sans-serif; background: white; color: var(--dark); outline: none; }
-
-    /* CONFIRM MODAL */
-    .overlay { position: fixed; inset: 0; background: rgba(45,27,53,0.65); z-index: 500; display: none; align-items: center; justify-content: center; }
-    .overlay.open { display: flex; }
-    .confirm-box { background: white; border-radius: 20px; padding: 2rem; max-width: 360px; width: 90%; text-align: center; animation: fadeUp 0.3s ease; }
-    .confirm-box h3 { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .confirm-box p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.5rem; }
-    .confirm-btns { display: flex; gap: 0.8rem; justify-content: center; }
-    .btn-yes { background: var(--red); color: white; border: none; padding: 0.7rem 1.8rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; transition: all 0.2s; }
-    .btn-yes:hover { background: #dc2626; transform: translateY(-2px); }
-    .btn-no { background: var(--bg); color: var(--muted); border: 2px solid var(--border); padding: 0.7rem 1.8rem; border-radius: 25px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; }
-
-    /* TOAST */
-    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 0.82rem; font-weight: 600; z-index: 999; transition: transform 0.4s; white-space: nowrap; border: 2px solid var(--pink); }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-
-    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    @media(max-width:640px) { .grid-2{grid-template-columns:1fr} .container{padding:0 1rem} header{padding:1rem} }
   </style>
 </head>
 <body>
 
 <header>
   <h1>🌸 Raw Materials Admin</h1>
-  <div class="header-links">
+  <div style="display:flex;gap:0.8rem;align-items:center">
     <a href="/">← Store</a>
-    <button class="btn-reset" onclick="openReset()">🗑️ Reset Orders</button>
+    <a href="/admin/logout">Logout 🔐</a>
   </div>
 </header>
 
-<div class="container">
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" onclick="showTab('products')">📦 Products</div>
+  <div class="tab" onclick="showTab('orders')">🛒 Orders</div>
+  <div class="tab" onclick="showTab('categories')">🏷️ Categories</div>
+  <div class="tab" onclick="showTab('reviews')">⭐ Reviews</div>
+</div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card c-pink">
-      <div class="stat-icon">📦</div>
+<!-- DASHBOARD -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="stats">
+    <div class="stat">
       <span class="stat-num">{{ products|length }}</span>
-      <div class="stat-label">Products</div>
+      <span class="stat-label">Products</span>
     </div>
-    <div class="stat-card c-purple">
-      <div class="stat-icon">🛍️</div>
+    <div class="stat">
       <span class="stat-num">{{ orders|length }}</span>
-      <div class="stat-label">Total Orders</div>
+      <span class="stat-label">Total Orders</span>
     </div>
-    <div class="stat-card c-green">
-      <div class="stat-icon">💰</div>
-      <span class="stat-num">₹{{ "{:,}".format(orders | sum(attribute='total')) }}</span>
-      <div class="stat-label">Total Revenue</div>
+    <div class="stat">
+      <span class="stat-num">{{ orders|selectattr('status','equalto','Pending')|list|length }}</span>
+      <span class="stat-label">Pending</span>
     </div>
-    <div class="stat-card c-yellow">
-      <div class="stat-icon">📅</div>
-      <span class="stat-num" id="tmRev">₹0</span>
-      <div class="stat-label">This Month Revenue</div>
+    <div class="stat">
+      <span class="stat-num">₹{{ orders|sum(attribute='total') }}</span>
+      <span class="stat-label">Revenue</span>
     </div>
-    <div class="stat-card c-blue">
-      <div class="stat-icon">🛒</div>
-      <span class="stat-num" id="tmOrd">0</span>
-      <div class="stat-label">This Month Orders</div>
+    <div class="stat">
+      <span class="stat-num">{{ categories|length }}</span>
+      <span class="stat-label">Categories</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">{{ reviews|length }}</span>
+      <span class="stat-label">Reviews</span>
     </div>
   </div>
 
-  <!-- MONTHLY REPORT -->
   <div class="card">
-    <div class="card-title">📊 Monthly Report</div>
-    <div class="month-grid" id="monthGrid">
-      <p style="color:var(--muted);font-size:0.88rem">Loading...</p>
-    </div>
+    <h3>⚠️ Recent Orders</h3>
+    <table>
+      <thead><tr><th>#</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for o in orders[:10] %}
+        <tr>
+          <td><strong>#{{ o.id }}</strong></td>
+          <td>{{ o.name }}<br/><small style="color:var(--muted)">{{ o.phone }}</small></td>
+          <td><strong>₹{{ o.total }}</strong></td>
+          <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
+          <td>{{ o.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+</div>
 
-  <!-- ADD PRODUCT + PRODUCT LIST -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">➕ Add Product</div>
+<!-- PRODUCTS -->
+<div class="tab-content" id="tab-products">
+  <div class="card">
+    <h3>➕ Add New Product</h3>
+    <div class="form-row">
       <div class="form-group">
-        <label>Product Name</label>
-        <input type="text" id="pName" placeholder="e.g. Crystal Beads"/>
+        <label>Product Name *</label>
+        <input type="text" id="pName" placeholder="e.g. Mini Headphone Charms"/>
       </div>
       <div class="form-group">
-        <label>Category</label>
+        <label>Category *</label>
         <select id="pCategory">
-          <option>Beads</option>
-          <option>Glass Beads</option>
-          <option>Pipe Cleaners</option>
-          <option>Locks</option>
-          <option>Earrings</option>
-          <option>Charms</option>
-          <option>Other</option>
+          {% for c in categories %}
+          <option>{{ c.name }}</option>
+          {% endfor %}
         </select>
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
-        <label>Price (₹)</label>
-        <input type="number" id="pPrice" placeholder="10"/>
+        <label>Selling Price (₹) *</label>
+        <input type="number" id="pPrice" placeholder="45"/>
       </div>
       <div class="form-group">
-        <label>Emoji</label>
-        <input type="text" id="pEmoji" placeholder="📿" maxlength="4"/>
+        <label>MRP (₹)</label>
+        <input type="number" id="pMrp" placeholder="60"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stock Quantity *</label>
+        <input type="number" id="pStock" placeholder="100"/>
+      </div>
+      <div class="form-group">
+        <label>Shipping Days</label>
+        <input type="text" id="pShipping" placeholder="3-4 days"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="pDesc" placeholder="Product description, details, uses..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Images (URLs — comma separated)</label>
+      <textarea id="pImages" placeholder="https://img1.jpg, https://img2.jpg, https://img3.jpg" style="min-height:55px"></textarea>
+      <div class="form-hint">⚡ Pehli image main image hogi. Baaki optional hain.</div>
+    </div>
+    <div class="form-group">
+      <label>Variants (format: label:price — comma separated)</label>
+      <input type="text" id="pVariants" placeholder="1pc:10, 10pcs:80, 20pcs:150"/>
+      <div class="form-hint">⚡ Example: 1pc:45, 10pcs:400</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Emoji Icon</label>
+        <input type="text" id="pEmoji" placeholder="🌸" maxlength="2"/>
       </div>
       <div class="form-group">
         <label>Card Color</label>
-        <input type="color" id="pColor" value="#f9c4d2" style="height:44px;padding:0.3rem;border-radius:8px;"/>
+        <input type="color" id="pColor" value="#fce7f3" style="height:42px;padding:0.2rem"/>
       </div>
-      <button class="btn-add" onclick="addProduct()">➕ Add Product</button>
     </div>
-
-    <div class="card">
-      <div class="card-title">🛍️ Products ({{ products|length }})</div>
-      <table id="productsTable">
-        <thead>
-          <tr><th>Product</th><th>Category</th><th>Price</th><th></th></tr>
-        </thead>
-        <tbody>
-          {% for p in products %}
-          <tr id="row-{{ p.id }}">
-            <td><span style="font-size:1.1rem">{{ p.emoji }}</span> {{ p.name }}</td>
-            <td><span class="badge badge-pur">{{ p.category }}</span></td>
-            <td><strong>₹{{ p.price }}</strong></td>
-            <td><button class="del-btn" onclick="deleteProduct({{ p.id }})">🗑</button></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <button class="btn btn-pink" onclick="addProduct()">➕ Add Product</button>
   </div>
 
-  <!-- ORDERS -->
   <div class="card">
-    <div class="card-title">📋 All Orders ({{ orders|length }})</div>
-    {% if orders %}
-    <div class="tbl-wrap">
+    <h3>📦 All Products ({{ products|length }})</h3>
     <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Customer</th><th>Phone</th><th>Address</th>
-          <th>Items</th><th>Total</th><th>Date</th><th>Status</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Variants</th><th>Actions</th></tr></thead>
       <tbody>
-        {% for o in orders %}
-        <tr>
-          <td><strong style="color:var(--pink)">#{{ o.id }}</strong></td>
-          <td><strong>{{ o.name }}</strong></td>
-          <td>{{ o.phone }}</td>
-          <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-            {{ o.address[:35] }}{% if o.address|length > 35 %}...{% endif %}
-          </td>
-          <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem;color:var(--muted)">
-            {{ o.items_json[:50] }}...
-          </td>
-          <td><strong style="color:var(--pink)">₹{{ "{:,}".format(o.total) }}</strong></td>
-          <td style="white-space:nowrap;font-size:0.78rem">{{ o.created_at[:10] }}</td>
+        {% for p in products %}
+        <tr id="prow-{{ p.id }}">
           <td>
-            <select class="status-sel" onchange="updateStatus({{ o.id }}, this.value)">
-              <option value="Pending"   {% if o.status=='Pending'   %}selected{% endif %}>⏳ Pending</option>
-              <option value="Confirmed" {% if o.status=='Confirmed' %}selected{% endif %}>✅ Confirmed</option>
-              <option value="Shipped"   {% if o.status=='Shipped'   %}selected{% endif %}>🚚 Shipped</option>
-              <option value="Delivered" {% if o.status=='Delivered' %}selected{% endif %}>📦 Delivered</option>
-              <option value="Cancelled" {% if o.status=='Cancelled' %}selected{% endif %}>❌ Cancelled</option>
-            </select>
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span style="font-size:1.5rem">{{ p.emoji }}</span>
+              <div>
+                <strong>{{ p.name }}</strong><br/>
+                <small style="color:var(--muted)">{{ p.description[:40] if p.description else '' }}...</small>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge" style="background:#fce7f3;color:var(--pink)">{{ p.category }}</span></td>
+          <td>
+            <strong>₹{{ p.price }}</strong>
+            {% if p.mrp and p.mrp > p.price %}
+            <br/><small style="text-decoration:line-through;color:var(--muted)">₹{{ p.mrp }}</small>
+            {% endif %}
+          </td>
+          <td>
+            <span style="color:{% if p.stock < 10 %}#ef4444{% else %}var(--mint){% endif %};font-weight:700">
+              {{ p.stock }}
+            </span>
+          </td>
+          <td><small style="color:var(--muted)">{{ p.variants[:50] if p.variants else 'None' }}</small></td>
+          <td>
+            <button class="btn btn-red btn-sm" onclick="deleteProduct({{ p.id }})">Delete</button>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="tab-content" id="tab-orders">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <h3 style="font-family:'Baloo 2',cursive;font-size:1.2rem">🛒 All Orders</h3>
+    <button class="btn btn-red btn-sm" onclick="resetOrders()">🗑️ Delete All Orders</button>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>#</th><th>Customer</th><th>Address</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><strong>#{{ o.id }}</strong></td>
+          <td>
+            <strong>{{ o.name }}</strong><br/>
+            <small>{{ o.phone }}</small>
+          </td>
+          <td><small style="color:var(--muted)">{{ o.address[:40] }}...</small></td>
+          <td><small style="color:var(--muted)">{{ o.items_json[:60] }}...</small></td>
+          <td><strong>₹{{ o.total }}</strong></td>
+          <td>
+            <select class="status-select" onchange="updateStatus({{ o.id }}, this.value)">
+              <option {% if o.status=='Pending' %}selected{% endif %}>Pending</option>
+              <option {% if o.status=='Confirmed' %}selected{% endif %}>Confirmed</option>
+              <option {% if o.status=='Shipped' %}selected{% endif %}>Shipped</option>
+              <option {% if o.status=='Delivered' %}selected{% endif %}>Delivered</option>
+              <option {% if o.status=='Cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+          </td>
+          <td>{{ o.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="tab-content" id="tab-categories">
+  <div class="card">
+    <h3>🏷️ Current Categories</h3>
+    <div class="cat-list" id="catList">
+      {% for c in categories %}
+      <div class="cat-tag" id="cat-{{ c.id }}">
+        {{ c.name }}
+        <button class="cat-del" onclick="deleteCategory({{ c.id }}, '{{ c.name }}')">✕</button>
+      </div>
+      {% endfor %}
     </div>
+  </div>
+  <div class="card">
+    <h3>➕ Add New Category</h3>
+    <div style="display:flex;gap:1rem;align-items:flex-end">
+      <div class="form-group" style="flex:1;margin:0">
+        <label>Category Name</label>
+        <input type="text" id="newCatName" placeholder="e.g. Stickers, Wire, Ribbon..."/>
+      </div>
+      <button class="btn btn-pink" onclick="addCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="tab-content" id="tab-reviews">
+  <div class="card">
+    <h3>⭐ All Reviews ({{ reviews|length }})</h3>
+    {% if reviews %}
+    <table>
+      <thead><tr><th>Reviewer</th><th>Rating</th><th>Review</th><th>Image</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for r in reviews %}
+        <tr id="rev-{{ r.id }}">
+          <td><strong>{{ r.reviewer_name }}</strong></td>
+          <td>
+            <span class="star-display">
+              {% for i in range(r.rating) %}⭐{% endfor %}
+            </span>
+            <small>({{ r.rating }}/5)</small>
+          </td>
+          <td><small>{{ r.review_text[:80] }}{% if r.review_text|length > 80 %}...{% endif %}</small></td>
+          <td>
+            {% if r.image_url %}
+            <img src="{{ r.image_url }}" class="review-img" onerror="this.style.display='none'"/>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ r.created_at[:10] }}</td>
+          <td><button class="btn btn-red btn-sm" onclick="deleteReview({{ r.id }})">Delete</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     {% else %}
-    <p style="text-align:center;color:var(--muted);padding:2.5rem;font-style:italic">Abhi koi order nahi aaya 😊</p>
+    <p style="color:var(--muted);text-align:center;padding:2rem;font-style:italic">Abhi koi review nahi aaya!</p>
     {% endif %}
   </div>
-
 </div>
-
-<!-- RESET CONFIRM -->
-<div class="overlay" id="resetOverlay">
-  <div class="confirm-box">
-    <h3>🗑️ Orders Reset?</h3>
-    <p>
-      Saare <strong>{{ orders|length }} orders</strong> permanently delete ho jayenge.<br/>
-      Yeh undo <strong>nahi</strong> ho sakta!<br/>
-      <span style="color:var(--green);font-weight:700">✅ Products safe rahenge.</span>
-    </p>
-    <div class="confirm-btns">
-      <button class="btn-yes" onclick="doReset()">Haan, Reset Karo</button>
-      <button class="btn-no" onclick="closeReset()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-  // Orders data from Flask
-  const ordersData = {{ orders | tojson }};
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
 
-  // ── MONTHLY ANALYTICS ──
-  (function() {
-    const map = {};
-    ordersData.forEach(o => {
-      const key = (o.created_at || '').slice(0, 7);
-      if (!key || key.length < 7) return;
-      if (!map[key]) map[key] = { orders: 0, revenue: 0 };
-      map[key].orders++;
-      map[key].revenue += (o.total || 0);
-    });
+async function addProduct() {
+  const fd = new FormData();
+  fd.append('name', document.getElementById('pName').value);
+  fd.append('category', document.getElementById('pCategory').value);
+  fd.append('price', document.getElementById('pPrice').value);
+  fd.append('mrp', document.getElementById('pMrp').value || 0);
+  fd.append('stock', document.getElementById('pStock').value || 100);
+  fd.append('shipping_days', document.getElementById('pShipping').value || '3-4 days');
+  fd.append('description', document.getElementById('pDesc').value);
+  fd.append('images', document.getElementById('pImages').value);
+  fd.append('variants', document.getElementById('pVariants').value);
+  fd.append('emoji', document.getElementById('pEmoji').value || '🌸');
+  fd.append('color', document.getElementById('pColor').value);
+  const res = await fetch('/admin/add-product', {method:'POST', body:fd});
+  const data = await res.json();
+  if (data.success) { alert('✅ Product add ho gaya!'); location.reload(); }
+  else alert('❌ Error: ' + (data.error || 'Something went wrong'));
+}
 
-    const keys = Object.keys(map).sort().reverse();
-    const maxRev = Math.max(...Object.values(map).map(v => v.revenue), 1);
-    const MN = ['','January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
+async function deleteProduct(id) {
+  if (!confirm('Delete karna hai?')) return;
+  const res = await fetch('/admin/delete-product/' + id, {method:'DELETE'});
+  const data = await res.json();
+  if (data.success) document.getElementById('prow-' + id).remove();
+}
 
-    const grid = document.getElementById('monthGrid');
-    if (!keys.length) {
-      grid.innerHTML = '<p style="color:var(--muted);font-size:0.88rem">Abhi koi data nahi. Pehla order aane ke baad report dikhe gi! 🌸</p>';
-      return;
-    }
+async function updateStatus(id, status) {
+  await fetch('/admin/update-order-status/' + id, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({status})
+  });
+}
 
-    grid.innerHTML = keys.map(k => {
-      const [yr, mo] = k.split('-');
-      const label = (MN[parseInt(mo)] || mo) + ' ' + yr;
-      const d = map[k];
-      const pct = Math.round((d.revenue / maxRev) * 100);
-      const avg = Math.round(d.revenue / d.orders);
-      return `
-        <div class="month-card">
-          <div class="month-name">📅 ${label}</div>
-          <div class="m-row"><span>Orders</span><span class="vp">${d.orders}</span></div>
-          <div class="m-row"><span>Revenue</span><span class="vg">₹${d.revenue.toLocaleString('en-IN')}</span></div>
-          <div class="m-row"><span>Avg Order</span><span class="vb">₹${avg}</span></div>
-          <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('');
+async function resetOrders() {
+  if (!confirm('Saare orders delete karne hain? Ye wapas nahi aayenge!')) return;
+  const res = await fetch('/admin/reset-orders', {method:'POST'});
+  const data = await res.json();
+  if (data.success) { alert('✅ Orders deleted!'); location.reload(); }
+}
 
-    // This month
-    const now = new Date();
-    const tk = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-    const tm = map[tk];
-    document.getElementById('tmRev').textContent = tm ? `₹${tm.revenue.toLocaleString('en-IN')}` : '₹0';
-    document.getElementById('tmOrd').textContent = tm ? tm.orders : '0';
-  })();
+async function addCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  if (!name) { alert('Naam daalo!'); return; }
+  const fd = new FormData();
+  fd.append('name', name);
+  const res = await fetch('/admin/add-category', {method:'POST', body:fd});
+  const data = await res.json();
+  if (data.success) { alert('✅ Category add ho gayi!'); location.reload(); }
+  else alert('❌ ' + (data.error || 'Error'));
+}
 
-  // ── ADD PRODUCT ──
-  async function addProduct() {
-    const name  = document.getElementById('pName').value.trim();
-    const cat   = document.getElementById('pCategory').value;
-    const price = document.getElementById('pPrice').value.trim();
-    const emoji = document.getElementById('pEmoji').value.trim() || '🧶';
-    const color = document.getElementById('pColor').value;
-    if (!name || !price) { showToast('❌ Name aur price bharo!'); return; }
-    const fd = new FormData();
-    fd.append('name',name); fd.append('category',cat);
-    fd.append('price',price); fd.append('emoji',emoji); fd.append('color',color);
-    const r = await fetch('/admin/add-product',{method:'POST',body:fd});
-    const d = await r.json();
-    if (d.success) { showToast('✅ Product add ho gaya!'); setTimeout(()=>location.reload(),900); }
-    else showToast('❌ '+(d.error||'Error'));
-  }
+async function deleteCategory(id, name) {
+  if (!confirm(`"${name}" category delete karna hai?`)) return;
+  const res = await fetch('/admin/delete-category/' + id, {method:'DELETE'});
+  const data = await res.json();
+  if (data.success) document.getElementById('cat-' + id).remove();
+}
 
-  // ── DELETE PRODUCT ──
-  async function deleteProduct(id) {
-    if (!confirm('Delete karna hai?')) return;
-    const r = await fetch(`/admin/delete-product/${id}`,{method:'DELETE'});
-    const d = await r.json();
-    if (d.success) { document.getElementById(`row-${id}`).remove(); showToast('🗑 Deleted!'); }
-  }
-
-  // ── UPDATE STATUS ──
-  async function updateStatus(id, status) {
-    const r = await fetch(`/admin/update-order-status/${id}`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({status})
-    });
-    const d = await r.json();
-    if (d.success) showToast(`✅ Status: ${status}`);
-  }
-
-  // ── RESET ORDERS ──
-  function openReset()  { document.getElementById('resetOverlay').classList.add('open'); }
-  function closeReset() { document.getElementById('resetOverlay').classList.remove('open'); }
-
-  async function doReset() {
-    closeReset();
-    const r = await fetch('/admin/reset-orders',{method:'POST'});
-    const d = await r.json();
-    if (d.success) { showToast('✅ Orders reset ho gaye!'); setTimeout(()=>location.reload(),1200); }
-    else showToast('❌ '+(d.error||'Error'));
-  }
-
-  // ── TOAST ──
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'), 2500);
-  }
+async function deleteReview(id) {
+  if (!confirm('Review delete karna hai?')) return;
+  const res = await fetch('/admin/delete-review/' + id, {method:'DELETE'});
+  const data = await res.json();
+  if (data.success) document.getElementById('rev-' + id).remove();
+}
 </script>
 </body>
 </html>
