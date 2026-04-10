@@ -560,7 +560,7 @@
           <p class="product-name">${p.name}</p>
           <div class="product-bottom">
             <div class="product-price">₹${p.price} <span>/pack</span></div>
-            <div id="ctrl-${p.id}">${qty > 0 ? qtyHTML(p.id, qty) : `<button class="add-btn" onclick="addToCart(${p.id})">+</button>`}</div>
+            <div id="ctrl-${p.id}">${p.stock <= 0 ? `<button class="add-btn" disabled style="background:#e5e7eb;color:#9ca3af;border-color:#e5e7eb;cursor:not-allowed;box-shadow:none;font-size:0.5rem">Out</button>` : qty > 0 ? qtyHTML(p.id, qty) : `<button class="add-btn" onclick="addToCart(${p.id})">+</button>`}</div>
           </div>
         </div>
       </div>`;
@@ -600,6 +600,8 @@
   function hideAddPopup() { document.getElementById('addPopup').classList.remove('show'); }
 
   function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    if (p && p.stock <= 0) { showToast('Ye product out of stock hai! 😔'); return; }
     const p = products.find(x => x.id === id);
     const ex = cart.find(x => x.id === id);
     if (ex) ex.qty++;

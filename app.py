@@ -10,8 +10,8 @@ app.secret_key = 'rawmaterials-secret-key-change-this'
 DB_PATH = 'store.db'
 WHATSAPP_NUMBER = '917838133167'
 
-ADMIN_USERNAME = 'Ayush'
-ADMIN_PASSWORD = '@yush2006'
+ADMIN_USERNAME = 'ayush123'
+ADMIN_PASSWORD = 'ayush123'
 
 # ── DATABASE ──
 def get_db():
@@ -232,7 +232,7 @@ def admin():
     if not session.get('admin_logged_in'):
         return redirect('/admin/login')
     conn = get_db()
-    products = [dict(p) for p in conn.execute('SELECT * FROM products').fetchall()]
+    products = [dict(p) for p in conn.execute('SELECT * FROM products ORDER BY created_at DESC').fetchall()]
     orders = [dict(o) for o in conn.execute('SELECT * FROM orders ORDER BY created_at DESC').fetchall()]
     categories = [dict(c) for c in conn.execute('SELECT * FROM categories ORDER BY name').fetchall()]
     reviews = [dict(r) for r in conn.execute('SELECT * FROM reviews ORDER BY created_at DESC').fetchall()]

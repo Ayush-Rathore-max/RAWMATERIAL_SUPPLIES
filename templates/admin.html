@@ -64,6 +64,27 @@
       .tab-content{padding:1rem}
       .stats{grid-template-columns:repeat(2,1fr)}
     }
+
+    /* MONTHLY */
+    .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 1rem; }
+    .month-card { background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; transition: all 0.2s; }
+    .month-card:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(232,84,122,0.12); }
+    .month-name { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 0.92rem; color: var(--dark); margin-bottom: 0.5rem; }
+    .m-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem; }
+    .m-row span:first-child { color: var(--muted); }
+    .vg { color: #10b981; font-weight: 800; }
+    .vp { color: var(--purple); font-weight: 800; }
+    .vb { color: #3b82f6; font-weight: 700; }
+    .bar-wrap { height: 5px; background: var(--border); border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--purple)); border-radius: 3px; }
+    .card-title { font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--dark); }
+
+    /* EDIT MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(45,27,53,0.6);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:white;border-radius:20px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;padding:2rem}
+    .modal-box h3{font-family:'Baloo 2',cursive;font-size:1.3rem;margin-bottom:1.2rem;color:var(--dark)}
+    .modal-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -237,6 +258,7 @@
           </td>
           <td><small style="color:var(--muted)">{{ p.variants[:50] if p.variants else 'None' }}</small></td>
           <td>
+            <button class="btn btn-green btn-sm" onclick="openEdit({{ p.id }}, '{{ p.name }}', '{{ p.category }}', {{ p.price }}, {{ p.mrp or 0 }}, '{{ p.emoji }}', '{{ p.color }}', {{ p.stock }}, '{{ p.shipping_days or "3-4 days" }}', `{{ p.description or "" }}`, `{{ p.images or "[]" }}`, `{{ p.variants or "[]" }}`)" style="margin-right:0.3rem">Edit</button>
             <button class="btn btn-red btn-sm" onclick="deleteProduct({{ p.id }})">Delete</button>
           </td>
         </tr>
@@ -343,6 +365,77 @@
   </div>
 </div>
 
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEdit()">✕</button>
+    <h3>✏️ Edit Product</h3>
+    <input type="hidden" id="editId"/>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input type="text" id="editName"/>
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="editCategory">
+          {% for c in categories %}
+          <option>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Selling Price (₹) *</label>
+        <input type="number" id="editPrice"/>
+      </div>
+      <div class="form-group">
+        <label>MRP (₹)</label>
+        <input type="number" id="editMrp"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stock *</label>
+        <input type="number" id="editStock"/>
+      </div>
+      <div class="form-group">
+        <label>Shipping Days</label>
+        <input type="text" id="editShipping"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="editDesc"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Images (URLs — comma separated)</label>
+      <textarea id="editImages" style="min-height:55px"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Variants (format: label:price — comma separated)</label>
+      <input type="text" id="editVariants"/>
+      <div class="form-hint">Example: 1pc:45, 10pcs:400</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Emoji Icon</label>
+        <input type="text" id="editEmoji" maxlength="2"/>
+      </div>
+      <div class="form-group">
+        <label>Card Color</label>
+        <input type="color" id="editColor" style="height:42px;padding:0.2rem"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:0.5rem">
+      <button class="btn btn-pink" onclick="saveEdit()" style="flex:1">💾 Save Changes</button>
+      <button class="btn btn-sm" onclick="closeEdit()" style="background:#f3f4f6;color:var(--dark)">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
   // ── MONTHLY ANALYTICS ──
@@ -388,6 +481,55 @@
   }
 
   buildMonthlyReport();
+
+  
+  function openEdit(id, name, cat, price, mrp, emoji, color, stock, shipping, desc, images, variants) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editCategory').value = cat;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editMrp').value = mrp;
+    document.getElementById('editEmoji').value = emoji;
+    document.getElementById('editColor').value = color || '#fce7f3';
+    document.getElementById('editStock').value = stock;
+    document.getElementById('editShipping').value = shipping;
+    document.getElementById('editDesc').value = desc;
+    // Parse images JSON to comma separated
+    try {
+      const imgs = JSON.parse(images);
+      document.getElementById('editImages').value = imgs.join(', ');
+    } catch { document.getElementById('editImages').value = images; }
+    // Parse variants JSON to label:price format
+    try {
+      const vars = JSON.parse(variants);
+      document.getElementById('editVariants').value = vars.map(v => v.label + ':' + v.price).join(', ');
+    } catch { document.getElementById('editVariants').value = variants; }
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeEdit() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+
+  async function saveEdit() {
+    const id = document.getElementById('editId').value;
+    const fd = new FormData();
+    fd.append('name', document.getElementById('editName').value);
+    fd.append('category', document.getElementById('editCategory').value);
+    fd.append('price', document.getElementById('editPrice').value);
+    fd.append('mrp', document.getElementById('editMrp').value || 0);
+    fd.append('stock', document.getElementById('editStock').value || 0);
+    fd.append('shipping_days', document.getElementById('editShipping').value || '3-4 days');
+    fd.append('description', document.getElementById('editDesc').value);
+    fd.append('images', document.getElementById('editImages').value);
+    fd.append('variants', document.getElementById('editVariants').value);
+    fd.append('emoji', document.getElementById('editEmoji').value || '🌸');
+    fd.append('color', document.getElementById('editColor').value);
+    const res = await fetch('/admin/edit-product/' + id, {method:'POST', body:fd});
+    const data = await res.json();
+    if (data.success) { alert('✅ Product update ho gaya!'); location.reload(); }
+    else alert('❌ Error: ' + (data.error || 'Something went wrong'));
+  }
 
   function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
