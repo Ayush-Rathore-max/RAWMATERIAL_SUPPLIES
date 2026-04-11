@@ -593,7 +593,7 @@
   let cart = [];
   const SHIPPING = 80;
 
-  async function loadProducts() {
+  window.loadProducts = async function() {
     try {
       const res = await fetch('/api/products');
       products = await res.json();
@@ -601,14 +601,14 @@
     } catch(e) { showToast("Failed to load products 😢"); }
   }
 
-  function getProductImg(p) {
+  window.getProductImg = function(p) {
     if (p.images && p.images.length > 0) {
       return '<img src="' + p.images[0] + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:4rem;position:absolute;inset:0">' + p.emoji + '</div>';
     }
     return '<span style="font-size:4rem">' + p.emoji + '</span>';
   }
 
-  function renderProducts(filtered) {
+  window.renderProducts = function(filtered) {
     const list = filtered || products;
     const grid = document.getElementById('productGrid');
     if (!list.length) {
@@ -637,7 +637,7 @@
     }).join('');
   }
 
-  function qtyHTML(id, qty) {
+  window.qtyHTML = function(id, qty) {
     return `<div style="display:flex;align-items:center;gap:4px">
       <button onclick="changeQty(${id},-1)" style="background:white;border:2px solid var(--pink);color:var(--pink);width:28px;height:28px;border-radius:50%;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;">−</button>
       <span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;min-width:18px;text-align:center">${qty}</span>
@@ -645,7 +645,7 @@
     </div>`;
   }
 
-  function changeQty(id, delta) {
+  window.changeQty = function(id, delta) {
     const item = cart.find(x => x.id === id);
     if (!item) return;
     item.qty += delta;
@@ -667,9 +667,9 @@
     clearTimeout(popupTimer);
     popupTimer = setTimeout(() => p.classList.remove('show'), 2800);
   }
-  function hideAddPopup() { document.getElementById('addPopup').classList.remove('show'); }
+  window.hideAddPopup = function() { document.getElementById('addPopup').classList.remove('show'); }
 
-  function addToCart(id) {
+  window.addToCart = function(id) {
     const p = products.find(x => x.id === id);
     if (p && p.stock <= 0) { showToast('Ye product out of stock hai! 😔'); return; }
     const ex = cart.find(x => x.id === id);
@@ -686,13 +686,13 @@
     updateCartUI();
   }
 
-  function calcTotals() {
+  window.calcTotals = function() {
     const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
     const shipping = subtotal > 0 ? SHIPPING : 0;
     return { subtotal, shipping, total: subtotal + shipping };
   }
 
-  function updateCartUI() {
+  window.updateCartUI = function() {
     const { subtotal, shipping, total } = calcTotals();
     const count = cart.reduce((s,i) => s+i.qty, 0);
     document.getElementById('cartCount').textContent = count;
@@ -727,7 +727,7 @@
     }
   }
 
-  function cartChangeQty(id, delta) {
+  window.cartChangeQty = function(id, delta) {
     const item = cart.find(x => x.id === id);
     if (!item) return;
     item.qty += delta;
@@ -740,10 +740,10 @@
     }
   }
 
-  function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
-  function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
+  window.openCart = function() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
+  window.closeCart = function() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
 
-  function openCheckout() {
+  window.openCheckout = function() {
     if (!cart.length) { showToast('Please add items first! 😊'); return; }
     const { subtotal } = calcTotals();
     if (subtotal < 300) { showToast('⚠️ Minimum order is ₹300!'); return; }
@@ -754,9 +754,9 @@
     document.getElementById('orderSuccess').style.display = 'none';
   }
 
-  function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
+  window.closeCheckout = function() { document.getElementById('checkoutModal').classList.remove('open'); }
 
-  async function placeOrder() {
+  window.placeOrder = async function() {
     const name    = document.getElementById('custName').value.trim();
     const phone   = document.getElementById('custPhone').value.trim();
     const address = document.getElementById('custAddress').value.trim();
@@ -785,13 +785,13 @@
     return `https://wa.me/917838133167?text=${encodeURIComponent(msg)}`;
   }
 
-  function filterProducts(category, el) {
+  window.filterProducts = function(category, el) {
     document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
     renderProducts(category === 'all' ? products : products.filter(p => p.category === category));
   }
 
-  function showToast(msg) {
+  window.showToast = function(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
@@ -807,13 +807,13 @@
   // ── REVIEWS ──
   let selectedRating = 0;
 
-  function setRating(r) {
+  window.setRating = function(r) {
     selectedRating = r;
     const stars = document.querySelectorAll('.star-pick');
     stars.forEach((s, i) => { s.textContent = i < r ? '⭐' : '☆'; });
   }
 
-  async function submitReview() {
+  window.submitReview = async function() {
     const name = document.getElementById('revName').value.trim();
     const text = document.getElementById('revText').value.trim();
     const imageUrl = document.getElementById('revImage').value.trim();
