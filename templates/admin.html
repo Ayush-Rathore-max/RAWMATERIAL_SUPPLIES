@@ -85,6 +85,37 @@
     .modal-box{background:white;border-radius:20px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;padding:2rem}
     .modal-box h3{font-family:'Baloo 2',cursive;font-size:1.3rem;margin-bottom:1.2rem;color:var(--dark)}
     .modal-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)}
+
+    /* VARIANT CARDS */
+    .variant-card {
+      background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem;
+      position: relative;
+    }
+    .variant-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;
+    }
+    .variant-title {
+      font-family: 'Baloo 2', cursive; font-size: 0.95rem; font-weight: 800; color: var(--pink);
+    }
+    .variant-remove {
+      background: #fef2f2; border: 1.5px solid #fecaca; color: #ef4444;
+      padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.72rem;
+      font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif;
+    }
+    .variant-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+    }
+    .v-field label {
+      display: block; font-size: 0.65rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;
+    }
+    .v-field input {
+      width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 0.5rem 0.7rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+      color: var(--dark); outline: none; transition: border-color 0.2s;
+    }
+    .v-field input:focus { border-color: var(--pink); }
+    .v-full { grid-column: 1 / -1; }
   </style>
 </head>
 <body>
@@ -210,11 +241,20 @@
       <textarea id="pImages" placeholder="https://img1.jpg, https://img2.jpg, https://img3.jpg" style="min-height:55px"></textarea>
       <div class="form-hint">⚡ Pehli image main image hogi. Baaki optional hain.</div>
     </div>
+    <!-- VARIANTS -->
     <div class="form-group">
-      <label>Variants (format: label:price — comma separated)</label>
-      <input type="text" id="pVariants" placeholder="1pc:10, 10pcs:80, 20pcs:150"/>
-      <div class="form-hint">⚡ Example: 1pc:45, 10pcs:400</div>
+      <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.82rem;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="pVariantToggle" onchange="toggleVariants('p')" style="width:16px;height:16px;accent-color:var(--pink);cursor:pointer;flex-shrink:0"/>
+        <span style="font-weight:700;color:var(--dark)">Variants add karne hain? <span style="color:var(--muted);font-weight:400">(optional — size, pack, quantity etc.)</span></span>
+      </label>
     </div>
+    <div id="pVariantSection" style="display:none;border:2px dashed var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem;background:var(--bg)">
+      <div id="pVariantCards" style="display:flex;flex-direction:column;gap:0.8rem"></div>
+      <button type="button" onclick="addVariantCard('p')" style="margin-top:0.8rem;background:white;border:1.5px dashed var(--pink);color:var(--pink);padding:0.5rem 1.2rem;border-radius:20px;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;width:100%">
+        ➕ Add New Variant
+      </button>
+    </div>
+    <input type="hidden" id="pVariants"/>
     <div class="form-row">
       <div class="form-group">
         <label>Emoji Icon</label>
@@ -414,11 +454,20 @@
       <label>Images (URLs — comma separated)</label>
       <textarea id="editImages" style="min-height:55px"></textarea>
     </div>
+    <!-- VARIANTS EDIT -->
     <div class="form-group">
-      <label>Variants (format: label:price — comma separated)</label>
-      <input type="text" id="editVariants"/>
-      <div class="form-hint">Example: 1pc:45, 10pcs:400</div>
+      <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.82rem;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="editVariantToggle" onchange="toggleVariants('edit')" style="width:16px;height:16px;accent-color:var(--pink);cursor:pointer;flex-shrink:0"/>
+        <span style="font-weight:700;color:var(--dark)">Variants hain? <span style="color:var(--muted);font-weight:400">(optional)</span></span>
+      </label>
     </div>
+    <div id="editVariantSection" style="display:none;border:2px dashed var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem;background:var(--bg)">
+      <div id="editVariantCards" style="display:flex;flex-direction:column;gap:0.8rem"></div>
+      <button type="button" onclick="addVariantCard('edit')" style="margin-top:0.8rem;background:white;border:1.5px dashed var(--pink);color:var(--pink);padding:0.5rem 1.2rem;border-radius:20px;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;width:100%">
+        ➕ Add New Variant
+      </button>
+    </div>
+    <input type="hidden" id="editVariants"/>
     <div class="form-row">
       <div class="form-group">
         <label>Emoji Icon</label>
@@ -499,11 +548,8 @@
       const imgs = JSON.parse(images);
       document.getElementById('editImages').value = imgs.join(', ');
     } catch { document.getElementById('editImages').value = images; }
-    // Parse variants JSON to label:price format
-    try {
-      const vars = JSON.parse(variants);
-      document.getElementById('editVariants').value = vars.map(v => v.label + ':' + v.price).join(', ');
-    } catch { document.getElementById('editVariants').value = variants; }
+    // Load variants into variant cards
+    loadVariantsIntoEdit(variants);
     document.getElementById('editModal').classList.add('open');
   }
 
@@ -522,7 +568,7 @@
     fd.append('shipping_days', document.getElementById('editShipping').value || '3-4 days');
     fd.append('description', document.getElementById('editDesc').value);
     fd.append('images', document.getElementById('editImages').value);
-    fd.append('variants', document.getElementById('editVariants').value);
+    fd.append('variants', collectVariants('edit'));
     fd.append('emoji', document.getElementById('editEmoji').value || '🌸');
     fd.append('color', document.getElementById('editColor').value);
     const res = await fetch('/admin/edit-product/' + id, {method:'POST', body:fd});
@@ -548,7 +594,7 @@ async function addProduct() {
   fd.append('shipping_days', document.getElementById('pShipping').value || '3-4 days');
   fd.append('description', document.getElementById('pDesc').value);
   fd.append('images', document.getElementById('pImages').value);
-  fd.append('variants', document.getElementById('pVariants').value);
+  fd.append('variants', collectVariants('p'));
   fd.append('emoji', document.getElementById('pEmoji').value || '🌸');
   fd.append('color', document.getElementById('pColor').value);
   const res = await fetch('/admin/add-product', {method:'POST', body:fd});
@@ -603,6 +649,134 @@ async function deleteReview(id) {
   const data = await res.json();
   if (data.success) document.getElementById('rev-' + id).remove();
 }
+
+  // ── VARIANT SYSTEM ──
+  function toggleVariants(prefix) {
+    const toggle = document.getElementById(prefix + 'VariantToggle');
+    const section = document.getElementById(prefix + 'VariantSection');
+    const cards = document.getElementById(prefix + 'VariantCards');
+    if (toggle.checked) {
+      section.style.display = 'block';
+      if (cards.children.length === 0) addVariantCard(prefix);
+    } else {
+      section.style.display = 'none';
+    }
+  }
+
+  let variantCounters = { p: 0, edit: 0 };
+
+  function addVariantCard(prefix) {
+    variantCounters[prefix]++;
+    const n = variantCounters[prefix];
+    const cards = document.getElementById(prefix + 'VariantCards');
+    const div = document.createElement('div');
+    div.className = 'variant-card';
+    div.id = prefix + 'vc' + n;
+    div.innerHTML = `
+      <div class="variant-header">
+        <span class="variant-title">Variant ${n}</span>
+        <button type="button" class="variant-remove" onclick="removeVariantCard('${prefix}vc${n}')">✕ Remove</button>
+      </div>
+      <div class="variant-grid">
+        <div class="v-field">
+          <label>Label / Name *</label>
+          <input type="text" placeholder="e.g. 1pc, 10pcs, Small" class="vLabel"/>
+        </div>
+        <div class="v-field">
+          <label>Price (₹) *</label>
+          <input type="number" placeholder="45" class="vPrice"/>
+        </div>
+        <div class="v-field">
+          <label>SKU</label>
+          <input type="text" placeholder="e.g. BEAD-10PC" class="vSku"/>
+        </div>
+        <div class="v-field">
+          <label>Stock</label>
+          <input type="number" placeholder="100" class="vStock"/>
+        </div>
+        <div class="v-field v-full">
+          <label>Image URL (optional)</label>
+          <input type="text" placeholder="https://example.com/image.jpg" class="vImg"/>
+        </div>
+      </div>`;
+    cards.appendChild(div);
+  }
+
+  function removeVariantCard(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  function collectVariants(prefix) {
+    const toggle = document.getElementById(prefix + 'VariantToggle');
+    if (!toggle || !toggle.checked) return '[]';
+    const cards = document.getElementById(prefix + 'VariantCards');
+    const variants = [];
+    cards.querySelectorAll('.variant-card').forEach(card => {
+      const label = card.querySelector('.vLabel').value.trim();
+      const price = card.querySelector('.vPrice').value.trim();
+      if (!label || !price) return;
+      variants.push({
+        label,
+        price: parseInt(price) || 0,
+        sku: card.querySelector('.vSku').value.trim(),
+        stock: parseInt(card.querySelector('.vStock').value) || 0,
+        image: card.querySelector('.vImg').value.trim()
+      });
+    });
+    return JSON.stringify(variants);
+  }
+
+  // Load existing variants into edit modal
+  function loadVariantsIntoEdit(variantsJson) {
+    try {
+      const vars = JSON.parse(variantsJson);
+      if (!vars || !vars.length) return;
+      const toggle = document.getElementById('editVariantToggle');
+      toggle.checked = true;
+      toggleVariants('edit');
+      // Clear auto-added card
+      document.getElementById('editVariantCards').innerHTML = '';
+      variantCounters['edit'] = 0;
+      vars.forEach(v => {
+        variantCounters['edit']++;
+        const n = variantCounters['edit'];
+        const cards = document.getElementById('editVariantCards');
+        const div = document.createElement('div');
+        div.className = 'variant-card';
+        div.id = 'editvc' + n;
+        div.innerHTML = `
+          <div class="variant-header">
+            <span class="variant-title">Variant ${n}</span>
+            <button type="button" class="variant-remove" onclick="removeVariantCard('editvc${n}')">✕ Remove</button>
+          </div>
+          <div class="variant-grid">
+            <div class="v-field">
+              <label>Label / Name *</label>
+              <input type="text" value="${v.label||''}" class="vLabel"/>
+            </div>
+            <div class="v-field">
+              <label>Price (₹) *</label>
+              <input type="number" value="${v.price||''}" class="vPrice"/>
+            </div>
+            <div class="v-field">
+              <label>SKU</label>
+              <input type="text" value="${v.sku||''}" class="vSku"/>
+            </div>
+            <div class="v-field">
+              <label>Stock</label>
+              <input type="number" value="${v.stock||''}" class="vStock"/>
+            </div>
+            <div class="v-field v-full">
+              <label>Image URL (optional)</label>
+              <input type="text" value="${v.image||''}" class="vImg"/>
+            </div>
+          </div>`;
+        cards.appendChild(div);
+      });
+    } catch(e) {}
+  }
+
 </script>
 </body>
 </html>
