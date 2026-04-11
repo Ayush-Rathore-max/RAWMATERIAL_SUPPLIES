@@ -24,7 +24,7 @@ DB_PATH = 'store.db'
 WHATSAPP_NUMBER = '917838133167'
 
 ADMIN_USERNAME = 'Ayush'
-ADMIN_PASSWORD = '@yush2006'
+ADMIN_PASSWORD = '@yush@2006'
 
 # ── DATABASE ──
 def get_db():
