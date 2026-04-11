@@ -211,9 +211,15 @@
       <div class="form-hint">⚡ Pehli image main image hogi. Baaki optional hain.</div>
     </div>
     <div class="form-group">
-      <label>Variants (format: label:price — comma separated)</label>
-      <input type="text" id="pVariants" placeholder="1pc:10, 10pcs:80, 20pcs:150"/>
-      <div class="form-hint">⚡ Example: 1pc:45, 10pcs:400</div>
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem">
+        <label style="margin:0">Variants (Optional)</label>
+        <input type="checkbox" id="pVariantCheck" onchange="toggleVariants('add')" style="width:18px;height:18px;accent-color:var(--pink);cursor:pointer"/>
+      </div>
+      <div id="pVariantsBox" style="display:none">
+        <div id="pVariantsList"></div>
+        <button type="button" onclick="addVariantRow('add')" style="background:var(--bg);border:1.5px dashed var(--pink);color:var(--pink);padding:0.5rem 1.2rem;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;margin-top:0.5rem;width:100%">+ Add New Variant</button>
+      </div>
+      <input type="hidden" id="pVariants"/>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -415,9 +421,15 @@
       <textarea id="editImages" style="min-height:55px"></textarea>
     </div>
     <div class="form-group">
-      <label>Variants (format: label:price — comma separated)</label>
-      <input type="text" id="editVariants"/>
-      <div class="form-hint">Example: 1pc:45, 10pcs:400</div>
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem">
+        <label style="margin:0">Variants (Optional)</label>
+        <input type="checkbox" id="editVariantCheck" onchange="toggleVariants('edit')" style="width:18px;height:18px;accent-color:var(--pink);cursor:pointer"/>
+      </div>
+      <div id="editVariantsBox" style="display:none">
+        <div id="editVariantsList"></div>
+        <button type="button" onclick="addVariantRow('edit')" style="background:var(--bg);border:1.5px dashed var(--pink);color:var(--pink);padding:0.5rem 1.2rem;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;margin-top:0.5rem;width:100%">+ Add New Variant</button>
+      </div>
+      <input type="hidden" id="editVariants"/>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -503,7 +515,8 @@
     try {
       const vars = JSON.parse(variants);
       document.getElementById('editVariants').value = vars.map(v => v.label + ':' + v.price).join(', ');
-    } catch { document.getElementById('editVariants').value = variants; }
+    } catch(e) {}
+    loadVariantsIntoUI('edit', variants);
     document.getElementById('editModal').classList.add('open');
   }
 
@@ -522,13 +535,84 @@
     fd.append('shipping_days', document.getElementById('editShipping').value || '3-4 days');
     fd.append('description', document.getElementById('editDesc').value);
     fd.append('images', document.getElementById('editImages').value);
-    fd.append('variants', document.getElementById('editVariants').value);
+    fd.append('variants', getVariantsJSON('edit'));
     fd.append('emoji', document.getElementById('editEmoji').value || '🌸');
     fd.append('color', document.getElementById('editColor').value);
     const res = await fetch('/admin/edit-product/' + id, {method:'POST', body:fd});
     const data = await res.json();
     if (data.success) { alert('✅ Product update ho gaya!'); location.reload(); }
     else alert('❌ Error: ' + (data.error || 'Something went wrong'));
+  }
+
+  
+  // ── VARIANTS UI ──
+  function toggleVariants(mode) {
+    const check = document.getElementById(mode === 'add' ? 'pVariantCheck' : 'editVariantCheck');
+    const box = document.getElementById(mode === 'add' ? 'pVariantsBox' : 'editVariantsBox');
+    const list = document.getElementById(mode === 'add' ? 'pVariantsList' : 'editVariantsList');
+    if (check.checked) {
+      box.style.display = 'block';
+      if (!list.children.length) addVariantRow(mode);
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function addVariantRow(mode) {
+    const list = document.getElementById(mode === 'add' ? 'pVariantsList' : 'editVariantsList');
+    const idx = list.children.length + 1;
+    const row = document.createElement('div');
+    row.style.cssText = 'background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.6rem;position:relative';
+    row.innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.6rem">Variant ${idx}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+        <div>
+          <label style="font-size:0.68rem;font-weight:700;color:var(--muted);display:block;margin-bottom:0.2rem">Label</label>
+          <input type="text" class="var-label" placeholder="e.g. 1pc, 10pcs" style="width:100%;padding:0.5rem 0.7rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none"/>
+        </div>
+        <div>
+          <label style="font-size:0.68rem;font-weight:700;color:var(--muted);display:block;margin-bottom:0.2rem">Price (₹)</label>
+          <input type="number" class="var-price" placeholder="e.g. 45" style="width:100%;padding:0.5rem 0.7rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none"/>
+        </div>
+      </div>
+      <button type="button" onclick="this.parentElement.remove()" style="position:absolute;top:0.5rem;right:0.5rem;background:none;border:none;color:#fca5a5;font-size:1rem;cursor:pointer;font-weight:700">✕</button>
+    `;
+    list.appendChild(row);
+  }
+
+  function getVariantsJSON(mode) {
+    const list = document.getElementById(mode === 'add' ? 'pVariantsList' : 'editVariantsList');
+    const check = document.getElementById(mode === 'add' ? 'pVariantCheck' : 'editVariantCheck');
+    if (!check.checked) return '[]';
+    const rows = list.querySelectorAll('div[style*="border-radius:12px"]');
+    const variants = [];
+    rows.forEach(row => {
+      const label = row.querySelector('.var-label').value.trim();
+      const price = parseInt(row.querySelector('.var-price').value);
+      if (label && !isNaN(price)) variants.push({label, price});
+    });
+    return JSON.stringify(variants);
+  }
+
+  function loadVariantsIntoUI(mode, variantsJSON) {
+    const list = document.getElementById(mode === 'add' ? 'pVariantsList' : 'editVariantsList');
+    const check = document.getElementById(mode === 'add' ? 'pVariantCheck' : 'editVariantCheck');
+    const box = document.getElementById(mode === 'add' ? 'pVariantsBox' : 'editVariantsBox');
+    try {
+      const vars = JSON.parse(variantsJSON);
+      if (vars && vars.length > 0) {
+        check.checked = true;
+        box.style.display = 'block';
+        list.innerHTML = '';
+        vars.forEach((v, i) => {
+          addVariantRow(mode);
+          const rows = list.querySelectorAll('div[style*="border-radius:12px"]');
+          const lastRow = rows[rows.length - 1];
+          lastRow.querySelector('.var-label').value = v.label;
+          lastRow.querySelector('.var-price').value = v.price;
+        });
+      }
+    } catch(e) {}
   }
 
   function showTab(name) {
@@ -548,7 +632,7 @@ async function addProduct() {
   fd.append('shipping_days', document.getElementById('pShipping').value || '3-4 days');
   fd.append('description', document.getElementById('pDesc').value);
   fd.append('images', document.getElementById('pImages').value);
-  fd.append('variants', document.getElementById('pVariants').value);
+  fd.append('variants', getVariantsJSON('add'));
   fd.append('emoji', document.getElementById('pEmoji').value || '🌸');
   fd.append('color', document.getElementById('pColor').value);
   const res = await fetch('/admin/add-product', {method:'POST', body:fd});
