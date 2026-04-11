@@ -262,9 +262,6 @@
 </div>
 
 <!-- ANNOUNCEMENT -->
- <div class="announce">
-  🌸 Raw Material at ₹1/- | 5000+ Orders Shipped | Minimum Order ₹300 | No COD/Return/Exchange | Shipping ₹80 🌸
-</div>
 
 
 <!-- NAVBAR -->
@@ -596,22 +593,22 @@
   let cart = [];
   const SHIPPING = 80;
 
-  window.loadProducts = async function() {
+  async function loadProducts() {
     try {
       const res = await fetch('/api/products');
       products = await res.json();
-      window.renderProducts();
-    } catch(e) { window.showToast("Failed to load products 😢"); }
+      renderProducts();
+    } catch(e) { showToast("Failed to load products 😢"); }
   }
 
-  window.getProductImg = function(p) {
+  function getProductImg(p) {
     if (p.images && p.images.length > 0) {
       return '<img src="' + p.images[0] + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:4rem;position:absolute;inset:0">' + p.emoji + '</div>';
     }
     return '<span style="font-size:4rem">' + p.emoji + '</span>';
   }
 
-  window.renderProducts = function(filtered) {
+  function renderProducts(filtered) {
     const list = filtered || products;
     const grid = document.getElementById('productGrid');
     if (!list.length) {
@@ -626,21 +623,21 @@
       <div class="product-card" style="animation-delay:${i*0.07}s">
         ${p.badge ? `<div class="product-badge ${p.badge}">${p.badge==='hot'?'🔥 Hot':'✨ New'}</div>` : ''}
         <div class="product-img" style="background:${bg};cursor:pointer;position:relative;overflow:hidden" onclick="openProductPage(${p.id})">
-          ${window.getProductImg(p)}
+          ${getProductImg(p)}
         </div>
         <div class="product-info">
           <p class="product-cat">${p.category}</p>
           <p class="product-name" style="cursor:pointer" onclick="openProductPage(${p.id})">${p.name}</p>
           <div class="product-bottom">
             <div class="product-price">₹${p.price} <span>/pack</span></div>
-            <div id="ctrl-${p.id}">${p.stock <= 0 ? `<button class="add-btn" disabled style="background:#e5e7eb;color:#9ca3af;border-color:#e5e7eb;cursor:not-allowed;box-shadow:none;font-size:0.5rem">Out</button>` : qty > 0 ? window.qtyHTML(p.id, qty) : `<button class="add-btn" onclick="addToCart(${p.id})">+</button>`}</div>
+            <div id="ctrl-${p.id}">${p.stock <= 0 ? `<button class="add-btn" disabled style="background:#e5e7eb;color:#9ca3af;border-color:#e5e7eb;cursor:not-allowed;box-shadow:none;font-size:0.5rem">Out</button>` : qty > 0 ? qtyHTML(p.id, qty) : `<button class="add-btn" onclick="addToCart(${p.id})">+</button>`}</div>
           </div>
         </div>
       </div>`;
     }).join('');
   }
 
-  window.qtyHTML = function(id, qty) {
+  function qtyHTML(id, qty) {
     return `<div style="display:flex;align-items:center;gap:4px">
       <button onclick="changeQty(${id},-1)" style="background:white;border:2px solid var(--pink);color:var(--pink);width:28px;height:28px;border-radius:50%;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;">−</button>
       <span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;min-width:18px;text-align:center">${qty}</span>
@@ -648,16 +645,16 @@
     </div>`;
   }
 
-  window.changeQty = function(id, delta) {
+  function changeQty(id, delta) {
     const item = cart.find(x => x.id === id);
     if (!item) return;
     item.qty += delta;
     if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
-    window.updateCartUI();
+    updateCartUI();
     const ctrl = document.getElementById(`ctrl-${id}`);
     if (ctrl) {
       const updated = cart.find(x => x.id === id);
-      ctrl.innerHTML = updated ? window.qtyHTML(id, updated.qty) : `<button class="add-btn" onclick="addToCart(${id})">+</button>`;
+      ctrl.innerHTML = updated ? qtyHTML(id, updated.qty) : `<button class="add-btn" onclick="addToCart(${id})">+</button>`;
     }
   }
 
@@ -670,32 +667,32 @@
     clearTimeout(popupTimer);
     popupTimer = setTimeout(() => p.classList.remove('show'), 2800);
   }
-  window.hideAddPopup = function() { document.getElementById('addPopup').classList.remove('show'); }
+  function hideAddPopup() { document.getElementById('addPopup').classList.remove('show'); }
 
-  window.addToCart = function(id) {
+  function addToCart(id) {
     const p = products.find(x => x.id === id);
-    if (p && p.stock <= 0) { window.showToast('Ye product out of stock hai! 😔'); return; }
+    if (p && p.stock <= 0) { showToast('Ye product out of stock hai! 😔'); return; }
     const ex = cart.find(x => x.id === id);
     if (ex) ex.qty++;
     else cart.push({...p, qty:1});
-    window.updateCartUI();
+    updateCartUI();
     showAddPopup(`${p.emoji} ${p.name} bag mein add hua!`);
     const ctrl = document.getElementById(`ctrl-${id}`);
-    if (ctrl) ctrl.innerHTML = window.qtyHTML(id, cart.find(x=>x.id===id).qty);
+    if (ctrl) ctrl.innerHTML = qtyHTML(id, cart.find(x=>x.id===id).qty);
   }
 
   function removeFromCart(id) {
     cart = cart.filter(x => x.id !== id);
-    window.updateCartUI();
+    updateCartUI();
   }
 
-  window.calcTotals = function() {
+  function calcTotals() {
     const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
     const shipping = subtotal > 0 ? SHIPPING : 0;
     return { subtotal, shipping, total: subtotal + shipping };
   }
 
-  window.updateCartUI = function() {
+  function updateCartUI() {
     const { subtotal, shipping, total } = calcTotals();
     const count = cart.reduce((s,i) => s+i.qty, 0);
     document.getElementById('cartCount').textContent = count;
@@ -730,40 +727,40 @@
     }
   }
 
-  window.cartChangeQty = function(id, delta) {
+  function cartChangeQty(id, delta) {
     const item = cart.find(x => x.id === id);
     if (!item) return;
     item.qty += delta;
     if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
-    window.updateCartUI();
+    updateCartUI();
     const ctrl = document.getElementById(`ctrl-${id}`);
     if (ctrl) {
       const updated = cart.find(x => x.id === id);
-      ctrl.innerHTML = updated ? window.qtyHTML(id, updated.qty) : `<button class="add-btn" onclick="addToCart(${id})">+</button>`;
+      ctrl.innerHTML = updated ? qtyHTML(id, updated.qty) : `<button class="add-btn" onclick="addToCart(${id})">+</button>`;
     }
   }
 
-  window.openCart = function() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
-  window.closeCart = function() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
+  function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); }
+  function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
 
-  window.openCheckout = function() {
-    if (!cart.length) { window.showToast('Please add items first! 😊'); return; }
+  function openCheckout() {
+    if (!cart.length) { showToast('Please add items first! 😊'); return; }
     const { subtotal } = calcTotals();
-    if (subtotal < 300) { window.showToast('⚠️ Minimum order is ₹300!'); return; }
-    window.updateCartUI();
+    if (subtotal < 300) { showToast('⚠️ Minimum order is ₹300!'); return; }
+    updateCartUI();
     closeCart();
     document.getElementById('checkoutModal').classList.add('open');
     document.getElementById('checkoutForm').style.display = 'block';
     document.getElementById('orderSuccess').style.display = 'none';
   }
 
-  window.closeCheckout = function() { document.getElementById('checkoutModal').classList.remove('open'); }
+  function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
 
-  window.placeOrder = async function() {
+  async function placeOrder() {
     const name    = document.getElementById('custName').value.trim();
     const phone   = document.getElementById('custPhone').value.trim();
     const address = document.getElementById('custAddress').value.trim();
-    if (!name || !phone || !address) { window.showToast('Please fill all fields! 🙏'); return; }
+    if (!name || !phone || !address) { showToast('Please fill all fields! 🙏'); return; }
     const { subtotal, shipping, total } = calcTotals();
     const items = cart.map(i => ({id:i.id, name:i.name, qty:i.qty, price:i.price}));
     let orderId = Math.floor(Math.random()*9000)+1000;
@@ -772,7 +769,7 @@
       const res = await fetch('/api/order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone, address, items, total}) });
       const data = await res.json();
       if (data.success) { orderId = data.order_id; waUrl = data.whatsapp_url || waUrl; }
-      else { window.showToast(data.error || 'Something went wrong!'); return; }
+      else { showToast(data.error || 'Something went wrong!'); return; }
     } catch(e) {}
     document.getElementById('checkoutForm').style.display = 'none';
     document.getElementById('orderSuccess').style.display = 'block';
@@ -788,13 +785,13 @@
     return `https://wa.me/917838133167?text=${encodeURIComponent(msg)}`;
   }
 
-  window.filterProducts = function(category, el) {
+  function filterProducts(category, el) {
     document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
-    window.renderProducts(category === 'all' ? products : products.filter(p => p.category === category));
+    renderProducts(category === 'all' ? products : products.filter(p => p.category === category));
   }
 
-  window.showToast = function(msg) {
+  function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
@@ -805,23 +802,23 @@
   const track = document.getElementById('marqueeTrack');
   track.innerHTML = [...mItems,...mItems].map(i => `<span class="marquee-item">${i}</span><span class="marquee-sep"> ✿ </span>`).join('').repeat(2);
 
-  window.loadProducts();
+  loadProducts();
 
   // ── REVIEWS ──
   let selectedRating = 0;
 
-  window.setRating = function(r) {
+  function setRating(r) {
     selectedRating = r;
     const stars = document.querySelectorAll('.star-pick');
     stars.forEach((s, i) => { s.textContent = i < r ? '⭐' : '☆'; });
   }
 
-  window.submitReview = async function() {
+  async function submitReview() {
     const name = document.getElementById('revName').value.trim();
     const text = document.getElementById('revText').value.trim();
     const imageUrl = document.getElementById('revImage').value.trim();
-    if (!name) { window.showToast('Naam daalo!'); return; }
-    if (!selectedRating) { window.showToast('Rating select karo!'); return; }
+    if (!name) { showToast('Naam daalo!'); return; }
+    if (!selectedRating) { showToast('Rating select karo!'); return; }
     try {
       const res = await fetch('/api/review', {
         method:'POST',
@@ -830,14 +827,14 @@
       });
       const data = await res.json();
       if (data.success) {
-        window.showToast('✅ Review submit ho gayi! Shukriya! 🌸');
+        showToast('✅ Review submit ho gayi! Shukriya! 🌸');
         document.getElementById('revName').value = '';
         document.getElementById('revText').value = '';
         document.getElementById('revImage').value = '';
         setRating(0);
         loadReviews();
       }
-    } catch(e) { window.showToast('Kuch problem hui!'); }
+    } catch(e) { showToast('Kuch problem hui!'); }
   }
 
   async function loadReviews() {
