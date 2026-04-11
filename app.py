@@ -3,9 +3,22 @@ import sqlite3
 import os
 import json
 import urllib.parse
+from werkzeug.utils import secure_filename
+import uuid
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 app = Flask(__name__)
 app.secret_key = 'rawmaterials-secret-key-change-this'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
+
+# Create upload folder
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 DB_PATH = 'store.db'
 WHATSAPP_NUMBER = '917838133167'
@@ -78,6 +91,20 @@ def init_db():
             pass
 
     # Sample products
+
+    # ── MIGRATE: add new columns if missing ──
+    existing = [row[1] for row in c.execute("PRAGMA table_info(products)").fetchall()]
+    migrations = {
+        'mrp':           'ALTER TABLE products ADD COLUMN mrp INTEGER DEFAULT 0',
+        'images':        "ALTER TABLE products ADD COLUMN images TEXT DEFAULT '[]'",
+        'variants':      "ALTER TABLE products ADD COLUMN variants TEXT DEFAULT '[]'",
+        'description':   "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
+        'shipping_days': "ALTER TABLE products ADD COLUMN shipping_days TEXT DEFAULT '3-4 days'",
+    }
+    for col, sql in migrations.items():
+        if col not in existing:
+            c.execute(sql)
+
     c.execute('SELECT COUNT(*) FROM products')
     if c.fetchone()[0] == 0:
         sample = [
@@ -119,6 +146,23 @@ def generate_whatsapp_message(order_id, name, phone, address, items, total):
     lines.append(f"💰 *Total: ₹{total}*")
     lines.append(f"⚠️ Min order ₹300 | No COD/Return")
     return "\n".join(lines)
+
+# ── FILE UPLOAD ──
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
+    if file and allowed_file(file.filename):
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = str(uuid.uuid4()) + '.' + ext
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        url = '/static/uploads/' + filename
+        return jsonify({'success': True, 'url': url})
+    return jsonify({'success': False, 'error': 'File type not allowed'}), 400
 
 # ── AUTH ──
 @app.route('/admin/login', methods=['GET','POST'])

@@ -237,9 +237,15 @@
       <textarea id="pDesc" placeholder="Product description, details, uses..."></textarea>
     </div>
     <div class="form-group">
-      <label>Images (URLs — comma separated)</label>
-      <textarea id="pImages" placeholder="https://img1.jpg, https://img2.jpg, https://img3.jpg" style="min-height:55px"></textarea>
-      <div class="form-hint">⚡ Pehli image main image hogi. Baaki optional hain.</div>
+      <label>Product Images (Optional — ek ya zyada)</label>
+      <div id="pImagesContainer" style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.6rem"></div>
+      <div style="border:2px dashed var(--border);border-radius:10px;padding:0.8rem;text-align:center;cursor:pointer" onclick="document.getElementById('pImageFile').click()">
+        <div style="font-size:1.5rem">📷</div>
+        <div style="font-size:0.78rem;color:var(--muted);font-weight:600">Click to add image</div>
+        <input type="file" id="pImageFile" accept="image/*" multiple style="display:none" onchange="uploadProductImages(this,'pImagesContainer','pImages')"/>
+      </div>
+      <div class="form-hint">⚡ Multiple images select kar sakte ho</div>
+      <input type="hidden" id="pImages"/>
     </div>
     <!-- VARIANTS -->
     <div class="form-group">
@@ -451,8 +457,15 @@
       <textarea id="editDesc"></textarea>
     </div>
     <div class="form-group">
-      <label>Images (URLs — comma separated)</label>
-      <textarea id="editImages" style="min-height:55px"></textarea>
+      <label>Product Images (Optional)</label>
+      <div id="editImagesContainer" style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.6rem"></div>
+      <div style="border:2px dashed var(--border);border-radius:10px;padding:0.8rem;text-align:center;cursor:pointer" onclick="document.getElementById('editImageFile').click()">
+        <div style="font-size:1.5rem">📷</div>
+        <div style="font-size:0.78rem;color:var(--muted);font-weight:600">Click to add image</div>
+        <input type="file" id="editImageFile" accept="image/*" multiple style="display:none" onchange="uploadProductImages(this,'editImagesContainer','editImages')"/>
+      </div>
+      <div class="form-hint">⚡ Multiple images select kar sakte ho</div>
+      <input type="hidden" id="editImages"/>
     </div>
     <!-- VARIANTS EDIT -->
     <div class="form-group">
@@ -543,11 +556,16 @@
     document.getElementById('editStock').value = stock;
     document.getElementById('editShipping').value = shipping;
     document.getElementById('editDesc').value = desc;
-    // Parse images JSON to comma separated
+    // Load existing images as thumbnails
     try {
       const imgs = JSON.parse(images);
-      document.getElementById('editImages').value = imgs.join(', ');
-    } catch { document.getElementById('editImages').value = images; }
+      document.getElementById('editImages').value = imgs.join(',');
+      const container = document.getElementById('editImagesContainer');
+      container.innerHTML = '';
+      imgs.forEach(url => {
+        if (url) addImageThumb(container, url, 'editImages');
+      });
+    } catch(e) { document.getElementById('editImages').value = ''; }
     // Load variants into variant cards
     loadVariantsIntoEdit(variants);
     document.getElementById('editModal').classList.add('open');
@@ -576,6 +594,50 @@
     if (data.success) { alert('✅ Product update ho gaya!'); location.reload(); }
     else alert('❌ Error: ' + (data.error || 'Something went wrong'));
   }
+
+  
+  // ── IMAGE UPLOAD ──
+  async function uploadProductImages(input, containerId, hiddenId) {
+    const container = document.getElementById(containerId);
+    const files = Array.from(input.files);
+    for (const file of files) {
+      const fd = new FormData();
+      fd.append('file', file);
+      try {
+        const res = await fetch('/api/upload', {method:'POST', body:fd});
+        const data = await res.json();
+        if (data.success) {
+          addImageThumb(container, data.url, hiddenId);
+        }
+      } catch(e) { alert('Image upload failed!'); }
+    }
+    input.value = '';
+  }
+
+  function addImageThumb(container, url, hiddenId) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;width:80px;height:80px;flex-shrink:0';
+    wrap.innerHTML = `
+      <img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border)"/>
+      <button type="button" onclick="removeImageThumb(this,'${hiddenId}')" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">✕</button>
+    `;
+    wrap.dataset.url = url;
+    container.appendChild(wrap);
+    updateHiddenImages(container, hiddenId);
+  }
+
+  function removeImageThumb(btn, hiddenId) {
+    const wrap = btn.parentElement;
+    const container = wrap.parentElement;
+    wrap.remove();
+    updateHiddenImages(container, hiddenId);
+  }
+
+  function updateHiddenImages(container, hiddenId) {
+    const urls = Array.from(container.querySelectorAll('[data-url]')).map(el => el.dataset.url);
+    document.getElementById(hiddenId).value = urls.join(',');
+  }
+
 
   function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

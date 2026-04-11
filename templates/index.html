@@ -421,8 +421,19 @@
     <textarea id="revText" placeholder="Aapka experience kaisa tha? Products kaisi thi?" style="width:100%;padding:0.7rem 1rem;border:2px solid #f0d6e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;resize:vertical;min-height:80px"></textarea>
   </div>
   <div style="margin-bottom:1rem">
-    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.3rem">Photo URL (optional)</label>
-    <input type="text" id="revImage" placeholder="https://... (apni photo ka link)" style="width:100%;padding:0.7rem 1rem;border:2px solid #f0d6e4;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none"/>
+    <label style="font-size:0.72rem;font-weight:700;color:#7a5068;text-transform:uppercase;display:block;margin-bottom:0.3rem">Photo (optional)</label>
+    <div style="border:2px dashed #f0d6e4;border-radius:10px;padding:1rem;text-align:center;cursor:pointer;position:relative" onclick="document.getElementById('revImageFile').click()">
+      <div id="revImagePreview" style="display:none;margin-bottom:0.5rem">
+        <img id="revPreviewImg" style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;border:1.5px solid #f0d6e4"/>
+      </div>
+      <div id="revImagePlaceholder">
+        <div style="font-size:1.8rem;margin-bottom:0.3rem">📷</div>
+        <div style="font-size:0.8rem;color:#7a5068;font-weight:600">Tap to add photo</div>
+        <div style="font-size:0.72rem;color:#b49aaa;margin-top:0.2rem">Gallery se ya camera se</div>
+      </div>
+      <input type="file" id="revImageFile" accept="image/*" style="display:none" onchange="previewRevImage(this)"/>
+    </div>
+    <input type="hidden" id="revImage"/>
   </div>
   <button onclick="submitReview()" style="background:linear-gradient(135deg,#e8547a,#d4466a);color:white;border:none;padding:0.9rem 2rem;border-radius:25px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(232,84,122,0.3)">Submit Review ⭐</button>
 </div>
@@ -770,6 +781,9 @@
         document.getElementById('revName').value = '';
         document.getElementById('revText').value = '';
         document.getElementById('revImage').value = '';
+        document.getElementById('revImageFile').value = '';
+        document.getElementById('revImagePreview').style.display = 'none';
+        document.getElementById('revImagePlaceholder').style.display = 'block';
         setRating(0);
         loadReviews();
       }
