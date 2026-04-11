@@ -359,7 +359,7 @@
   <div class="contact-card">
     <div class="icon">✉️</div>
     <strong>Email</strong>
-    <a href="mailto:rawmaterialsupplies@gmail.com">rawmaterialsupplies@gmail.com</a>
+    <a href="/cdn-cgi/l/email-protection#f587948298948190879c949986808585999c9086b59298949c99db969a98"><span class="__cf_email__" data-cfemail="7c0e1d0b111d08190e151d100f090c0c1015190f3c1b111d1510521f1311">[email&#160;protected]</span></a>
     <p style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">Bulk orders ke liye</p>
   </div>
 </div>
@@ -515,7 +515,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── CURSOR ──
   const cursor = document.getElementById('cursor');
   if (cursor && window.matchMedia('(pointer: fine)').matches) {
@@ -785,14 +785,14 @@
             <small style="color:#7a5068">${r.created_at.slice(0,10)}</small>
           </div>
           ${r.review_text ? `<p style="color:#2d1b35;font-size:0.88rem;margin-top:0.5rem;line-height:1.6">${r.review_text}</p>` : ''}
-          ${r.image_url ? `<img src="${r.image_url}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin-top:0.6rem;border:1.5px solid #f0d6e4" onerror="this.style.display='none'"/>` : ''}
-        </div>
-      `).join('');
-    } catch(e) {}
+          ${r.image_url ? `<img src="${r.image_url}" style="width:100%;max-width:200px;border-radius:10px;margin-top:0.6rem;border:1.5px solid #f0d6e4;object-fit:cover" onerror="this.style.display='none'"/>` : ''}
+        </div>`).join('');
+    } catch(e) {
+      document.getElementById('reviewsList').innerHTML = '';
+    }
   }
 
   loadReviews();
-
 </script>
 </body>
 </html>
