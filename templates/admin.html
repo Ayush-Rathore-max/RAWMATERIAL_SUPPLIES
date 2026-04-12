@@ -332,7 +332,11 @@
             <small>{{ o.phone }}</small>
           </td>
           <td><small style="color:var(--muted)">{{ o.address[:40] }}...</small></td>
-          <td><small style="color:var(--muted)">{{ o.items_json[:60] }}...</small></td>
+          <td>
+            <button onclick="showOrderItems({{ o.id }}, `{{ o.items_json | replace('`', '') }}`)" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:0.3rem 0.7rem;font-size:0.72rem;font-weight:700;cursor:pointer;color:var(--dark)">
+              📦 View Items
+            </button>
+          </td>
           <td><strong>₹{{ o.total }}</strong></td>
           <td>
             <select class="status-select" onchange="updateStatus({{ o.id }}, this.value)">
@@ -639,6 +643,29 @@
   }
 
 
+  
+  function showOrderItems(orderId, itemsJson) {
+    try {
+      const items = JSON.parse(itemsJson);
+      const list = document.getElementById('orderItemsList');
+      list.innerHTML = items.map(item => `
+        <div style="display:flex;align-items:center;gap:0.8rem;padding:0.8rem;border:1.5px solid var(--border);border-radius:12px;margin-bottom:0.6rem">
+          <div style="width:50px;height:50px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">
+            ${item.image ? `<img src="${item.image}" style="width:50px;height:50px;border-radius:8px;object-fit:cover"/>` : '📦'}
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:0.88rem">${item.name}</div>
+            ${item.variant ? `<div style="font-size:0.75rem;color:var(--muted)">Variant: ${item.variant}</div>` : ''}
+            <div style="font-size:0.82rem;color:var(--pink);font-weight:700;margin-top:0.2rem">₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('orderItemsModal').style.display = 'flex';
+    } catch(e) {
+      alert('Items load nahi ho sake!');
+    }
+  }
+
   function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -727,6 +754,35 @@ async function deleteReview(id) {
 
   let variantCounters = { p: 0, edit: 0 };
 
+
+  function previewVariantImg(input) {
+    if (!input.files || !input.files[0]) return;
+    const card = input.closest('.variant-card') || input.closest('[class*="v-field"]').closest('div[id]');
+    const preview = input.closest('div[style*="border"]').querySelector('.vImgPreview');
+    const previewWrap = input.closest('div[style*="border"]').querySelector('.vImgPreviewWrap');
+    const placeholder = input.closest('div[style*="border"]').querySelector('.vImgPlaceholder');
+    const hiddenImg = input.closest('.v-field').querySelector('.vImg');
+    
+    // Show local preview immediately
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      previewWrap.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+    
+    // Upload to server
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fetch('/api/upload', {method:'POST', body:fd})
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) hiddenImg.value = data.url;
+      })
+      .catch(e => console.error('Upload failed', e));
+  }
+
   function addVariantCard(prefix) {
     variantCounters[prefix]++;
     const n = variantCounters[prefix];
@@ -741,7 +797,7 @@ async function deleteReview(id) {
       </div>
       <div class="variant-grid">
         <div class="v-field">
-          <label>Label / Name *</label>
+          <label>Name *</label>
           <input type="text" placeholder="e.g. 1pc, 10pcs, Small" class="vLabel"/>
         </div>
         <div class="v-field">
@@ -749,16 +805,19 @@ async function deleteReview(id) {
           <input type="number" placeholder="45" class="vPrice"/>
         </div>
         <div class="v-field">
-          <label>SKU</label>
-          <input type="text" placeholder="e.g. BEAD-10PC" class="vSku"/>
-        </div>
-        <div class="v-field">
           <label>Stock</label>
           <input type="number" placeholder="100" class="vStock"/>
         </div>
         <div class="v-field v-full">
-          <label>Image URL (optional)</label>
-          <input type="text" placeholder="https://example.com/image.jpg" class="vImg"/>
+          <label>Image (optional)</label>
+          <div style="border:1.5px dashed var(--border);border-radius:8px;padding:0.6rem;text-align:center;cursor:pointer;position:relative" onclick="this.querySelector('.vImgFile').click()">
+            <div class="vImgPreviewWrap" style="display:none;margin-bottom:0.4rem">
+              <img class="vImgPreview" style="max-width:80px;max-height:80px;border-radius:6px;object-fit:cover"/>
+            </div>
+            <div class="vImgPlaceholder" style="font-size:0.78rem;color:var(--muted)">📷 Gallery se upload karo</div>
+            <input type="file" class="vImgFile" accept="image/*" style="display:none" onchange="previewVariantImg(this)"/>
+          </div>
+          <input type="hidden" class="vImg"/>
         </div>
       </div>`;
     cards.appendChild(div);
@@ -781,9 +840,8 @@ async function deleteReview(id) {
       variants.push({
         label,
         price: parseInt(price) || 0,
-        sku: card.querySelector('.vSku').value.trim(),
         stock: parseInt(card.querySelector('.vStock').value) || 0,
-        image: card.querySelector('.vImg').value.trim()
+        image: card.querySelector('.vImg').value || ''
       });
     });
     return JSON.stringify(variants);
@@ -814,7 +872,7 @@ async function deleteReview(id) {
           </div>
           <div class="variant-grid">
             <div class="v-field">
-              <label>Label / Name *</label>
+              <label>Name *</label>
               <input type="text" value="${v.label||''}" class="vLabel"/>
             </div>
             <div class="v-field">
@@ -822,16 +880,19 @@ async function deleteReview(id) {
               <input type="number" value="${v.price||''}" class="vPrice"/>
             </div>
             <div class="v-field">
-              <label>SKU</label>
-              <input type="text" value="${v.sku||''}" class="vSku"/>
-            </div>
-            <div class="v-field">
               <label>Stock</label>
               <input type="number" value="${v.stock||''}" class="vStock"/>
             </div>
             <div class="v-field v-full">
-              <label>Image URL (optional)</label>
-              <input type="text" value="${v.image||''}" class="vImg"/>
+              <label>Image (optional)</label>
+              <div style="border:1.5px dashed var(--border);border-radius:8px;padding:0.6rem;text-align:center;cursor:pointer;position:relative" onclick="this.querySelector('.vImgFile').click()">
+                <div class="vImgPreviewWrap" style="display:${v.image?'block':'none'};margin-bottom:0.4rem">
+                  <img class="vImgPreview" src="${v.image||''}" style="max-width:80px;max-height:80px;border-radius:6px;object-fit:cover"/>
+                </div>
+                <div class="vImgPlaceholder" style="font-size:0.78rem;color:var(--muted);display:${v.image?'none':'block'}">📷 Gallery se upload karo</div>
+                <input type="file" class="vImgFile" accept="image/*" style="display:none" onchange="previewVariantImg(this)"/>
+              </div>
+              <input type="hidden" class="vImg" value="${v.image||''}"/>
             </div>
           </div>`;
         cards.appendChild(div);
@@ -840,5 +901,17 @@ async function deleteReview(id) {
   }
 
 </script>
+
+<!-- ORDER ITEMS MODAL -->
+<div id="orderItemsModal" style="display:none;position:fixed;inset:0;background:rgba(45,27,53,0.6);z-index:500;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:white;border-radius:20px;width:min(500px,95vw);max-height:80vh;overflow-y:auto;padding:2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:1.3rem;color:var(--dark)">📦 Order Items</h3>
+      <button onclick="document.getElementById('orderItemsModal').style.display='none'" style="background:var(--bg);border:2px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--muted)">✕</button>
+    </div>
+    <div id="orderItemsList"></div>
+  </div>
+</div>
+
 </body>
 </html>

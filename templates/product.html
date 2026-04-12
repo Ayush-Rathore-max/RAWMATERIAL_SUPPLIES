@@ -333,8 +333,19 @@
       <textarea id="revText" placeholder="Aapka experience kaisa tha?"></textarea>
     </div>
     <div class="r-group">
-      <label>Photo URL (optional)</label>
-      <input type="text" id="revImage" placeholder="https://... apni photo ka link"/>
+      <label>Photo (optional)</label>
+      <div style="border:2px dashed #f0d6e4;border-radius:10px;padding:1rem;text-align:center;cursor:pointer;position:relative" onclick="document.getElementById('revImageFile').click()">
+        <div id="revImagePreview" style="display:none;margin-bottom:0.5rem">
+          <img id="revPreviewImg" style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;border:1.5px solid #f0d6e4"/>
+        </div>
+        <div id="revImagePlaceholder">
+          <div style="font-size:1.8rem;margin-bottom:0.3rem">📷</div>
+          <div style="font-size:0.8rem;color:#7a5068;font-weight:600">Tap to add photo</div>
+          <div style="font-size:0.72rem;color:#b49aaa;margin-top:0.2rem">Gallery ya camera se</div>
+        </div>
+        <input type="file" id="revImageFile" accept="image/*" style="display:none" onchange="previewRevImage(this)"/>
+      </div>
+      <input type="hidden" id="revImage"/>
     </div>
     <button class="submit-review-btn" onclick="submitReview()">Submit Review ⭐</button>
   </div>
@@ -493,6 +504,7 @@
 
   // ── ADD TO CART ──
   function addThisToCart() {
+    if (PRODUCT.stock <= 0) { showToast('❌ Ye product out of stock hai!'); return; }
     const price = selectedVariant ? selectedVariant.price : PRODUCT.price;
     const variantLabel = selectedVariant ? selectedVariant.label : '';
     const key = PRODUCT.id + '_' + (variantLabel || 'default');
@@ -642,7 +654,18 @@
   async function submitReview() {
     const name = document.getElementById('revName').value.trim();
     const text = document.getElementById('revText').value.trim();
-    const imageUrl = document.getElementById('revImage').value.trim();
+    // Upload image first if selected
+    let imageUrl = '';
+    const fileInput = document.getElementById('revImageFile');
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      const fd = new FormData();
+      fd.append('file', fileInput.files[0]);
+      try {
+        const uploadRes = await fetch('/api/upload', {method:'POST', body:fd});
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) imageUrl = uploadData.url;
+      } catch(e) {}
+    }
     if (!name) { showToast('Naam daalo!'); return; }
     if (!selectedRating) { showToast('Rating select karo!'); return; }
     try {
@@ -656,6 +679,11 @@
         document.getElementById('revName').value = '';
         document.getElementById('revText').value = '';
         document.getElementById('revImage').value = '';
+        if(document.getElementById('revImageFile')) {
+          document.getElementById('revImageFile').value = '';
+          document.getElementById('revImagePreview').style.display = 'none';
+          document.getElementById('revImagePlaceholder').style.display = 'block';
+        }
         setRating(0);
         setTimeout(() => location.reload(), 1200);
       }
