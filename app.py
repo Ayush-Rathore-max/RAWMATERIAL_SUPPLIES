@@ -444,6 +444,22 @@ def delete_review(rid):
     conn.close()
     return jsonify({'success':True})
 
+
+@app.route('/sitemap.xml')
+def sitemap():
+    conn = get_db()
+    products = conn.execute('SELECT id FROM products').fetchall()
+    conn.close()
+    urls = ['<url><loc>https://rawmaterial-supplies.onrender.com/</loc><priority>1.0</priority></url>']
+    for p in products:
+        urls.append(f'<url><loc>https://rawmaterial-supplies.onrender.com/product/{p["id"]}</loc><priority>0.8</priority></url>')
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(urls) + '</urlset>'
+    return xml, 200, {'Content-Type': 'application/xml'}
+
+@app.route('/robots.txt')
+def robots():
+    return "User-agent: *\nAllow: /\nSitemap: https://rawmaterial-supplies.onrender.com/sitemap.xml", 200, {'Content-Type': 'text/plain'}
+
 if __name__ == '__main__':
     init_db()
     print("✅ Database ready!")
