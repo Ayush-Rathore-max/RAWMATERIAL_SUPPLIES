@@ -233,7 +233,18 @@ def place_order():
     if total < 300:
         return jsonify({'success':False,'error':'Minimum order ₹300 hai!'}),400
 
+    # Fetch product images to store with order
     conn = get_db()
+    for item in items:
+        try:
+            p = conn.execute('SELECT images, emoji, color FROM products WHERE id=?', (item.get('id'),)).fetchone()
+            if p:
+                imgs = json.loads(p['images'] or '[]')
+                item['image'] = imgs[0] if imgs else ''
+                item['emoji'] = p['emoji'] or '🌸'
+                item['color'] = p['color'] or '#fce7f3'
+        except:
+            pass
     conn.execute('INSERT INTO orders (name,phone,address,total,items_json) VALUES (?,?,?,?,?)',
         (name, phone, address, total, json.dumps(items)))
     conn.commit()
